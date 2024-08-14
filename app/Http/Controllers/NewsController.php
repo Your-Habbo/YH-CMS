@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\PjaxTrait;
 use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class NewsController extends Controller
 {
+    use PjaxTrait;
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the news articles.
      */
     public function index()
     {
         $news = News::with('author')->orderBy('published_at', 'desc')->paginate(10);
-        return view('news.index', compact('news'));
+        return $this->view('news.index', compact('news'));
     }
 
     /**
@@ -22,7 +27,7 @@ class NewsController extends Controller
      */
     public function create()
     {
-        return view('news.create');
+        return $this->view('news.create');
     }
 
     /**
@@ -56,7 +61,7 @@ class NewsController extends Controller
     public function show($slug)
     {
         $news = News::where('slug', $slug)->firstOrFail();
-        return view('news.show', compact('news'));
+        return $this->view('news.show', compact('news'));
     }
 
     /**
@@ -64,7 +69,9 @@ class NewsController extends Controller
      */
     public function edit(News $news)
     {
-        return view('news.edit', compact('news'));
+        $this->authorize('update', $news);
+
+        return $this->view('news.edit', compact('news'));
     }
 
     /**
@@ -72,6 +79,8 @@ class NewsController extends Controller
      */
     public function update(Request $request, News $news)
     {
+        $this->authorize('update', $news);
+
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -94,17 +103,19 @@ class NewsController extends Controller
      */
     public function destroy(News $news)
     {
+        $this->authorize('delete', $news);
+
         $news->delete();
 
         return redirect()->route('news.index')->with('success', 'News article deleted successfully.');
     }
-
 
     /**
      * Search for news articles.
      */
     public function search(Request $request)
     {
+        $request->validate(['query' => 'required|string|min:3']);
         $query = $request->input('query');
 
         $news = News::where('title', 'like', "%{$query}%")
@@ -112,6 +123,6 @@ class NewsController extends Controller
                     ->orderBy('published_at', 'desc')
                     ->paginate(10);
 
-        return view('news.index', compact('news', 'query'));
+        return $this->view('news.index', compact('news', 'query'));
     }
 }

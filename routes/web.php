@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\HomeController;
@@ -18,15 +19,18 @@ use App\Http\Controllers\Admin\DashboardController;
 // Public routes
 Route::middleware('web')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('index');
-    Route::get('/about', [PageController::class, 'about'])->name('about');
-    Route::get('/terms', [PageController::class, 'terms'])->name('terms');
-    Route::get('/disclaimer', [PageController::class, 'disclaimer'])->name('disclaimer');
-    Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
+    Route::get('/about', [PageController::class, 'about'])->name('page.about');
+    Route::get('/terms', [PageController::class, 'terms'])->name('page.terms');
+    Route::get('/disclaimer', [PageController::class, 'disclaimer'])->name('page.disclaimer');
+    Route::get('/privacy', [PageController::class, 'privacy'])->name('page.privacy');
     
     // News
     Route::get('news', [NewsController::class, 'index'])->name('news.index');
     Route::get('news/search', [NewsController::class, 'search'])->name('news.search');
     Route::get('news/{slug}', [NewsController::class, 'show'])->name('news.show');
+
+    Route::resource('events', EventController::class);
+    Route::get('events/search', [EventController::class, 'search'])->name('events.search');
 
     // Forum
     Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');

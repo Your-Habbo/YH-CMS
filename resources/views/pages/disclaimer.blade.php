@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="max-w-4xl mx-auto">
         <h1 class="text-3xl font-bold text-center mb-8">Disclaimer</h1>
@@ -84,4 +82,3 @@
         </div>
     </div>
 </main>
-@endsection

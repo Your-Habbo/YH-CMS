@@ -18,12 +18,21 @@
 <body>
     @include('layouts.partials.header')
 
-    <div id="loading" style="display: none;">
-        <div class="spinner"></div>
-        <p>Loading... This may take a few seconds, please don't close this page.</p>
+    <div id="loading" style="display: none; position: fixed; top: 10px; right: 20px; z-index: 9999; background-color: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 5px; font-size: 14px;">
+    <div style="display: flex; align-items: center;">
+        <div class="spinner" style="width: 20px; height: 20px; border: 2px solid #fff; border-top: 2px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+        <span>Loading...</span>
     </div>
+</div>
 
-    <main id="content" class="flex justify-center px-4 sm:px-6 lg:px-8 pt-10">
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+    <main id="content" class="flex justify-center mt-10 px-4 sm:px-6 lg:px-8">
         {{-- This will load the content when the page is not using PJAX --}}
         {!! $content !!}
     </main>
@@ -32,6 +41,8 @@
 
     <script>
 $(document).ready(function() {
+    var loadingTimer;
+
     $(document).on('click', 'a:not([data-no-pjax])', function(event) {
         event.preventDefault();
         var url = $(this).attr('href');
@@ -39,29 +50,34 @@ $(document).ready(function() {
     });
 
     function loadContent(url) {
-        $('#loading').show(); // Show loading spinner
-        $('#content').hide(); // Hide current content
+        clearTimeout(loadingTimer);
+        
+        loadingTimer = setTimeout(function() {
+            $('#loading').fadeIn(300);
+            $('#page-footer').addClass('opacity-0');
+        }, 300);
+
         $.ajax({
             url: url,
             type: 'GET',
             headers: {
                 'X-PJAX': 'true'
             },
-            dataType: 'html',
-            success: function(data) {
-                $('#content').html(data).show(); // Load and show new content
-                history.pushState(null, null, url);
-                initializePage(); // Re-initialize any JS plugins or event listeners
+            dataType: 'json',
+            success: function(response) {
+                $('#content').html(response.html);
+                history.pushState(null, null, response.url);
+                document.title = response.title;
+                initializePage();
             },
-            complete: function() {
-                setTimeout(function() {
-                    $('#loading').hide();
-                }, 100); // 100ms delay to ensure rendering is complete
-            }
             error: function(xhr, status, error) {
                 console.error("AJAX error:", status, error);
-                $('#content').show(); // Show content in case of error
-                alert('An error occurred while loading the page. Please try again.');
+                toastr.error('An error occurred while loading the page. Please try again.', 'Error');
+            },
+            complete: function() {
+                clearTimeout(loadingTimer);
+                $('#loading').fadeOut(300);
+                $('#page-footer').removeClass('opacity-0');
             }
         });
     }
@@ -70,9 +86,16 @@ $(document).ready(function() {
         loadContent(window.location.href);
     });
 
-    initializePage(); // Initial call for the first load
-});
+    function initializePage() {
+        // Re-initialize any JS plugins or event listeners here
+    }
 
-    </script>
+    initializePage();
+});
+</script>
+<script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+</script>
+
 </body>
 </html>

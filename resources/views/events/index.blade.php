@@ -1,8 +1,6 @@
-@extends('layouts.app')
 
-@section('content')
-<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="max-w-7xl mx-auto">
+
+    <div class="w-[70%]">
         <!-- Event Banner (Original Style) -->
         <div class="mb-8 rounded-lg overflow-hidden shadow-lg">
             <div class="relative h-64 sm:h-80 md:h-96 bg-gray-800">
@@ -60,5 +58,3 @@
             </div>
         </div>
     </div>
-</main>
-@endsection

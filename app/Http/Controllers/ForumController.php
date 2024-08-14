@@ -30,20 +30,24 @@ class ForumController extends Controller
      * Display a listing of the forum threads.
      */
     public function index()
-    {   
+    {
         $breadcrumbs = [
             ['label' => 'Home', 'url' => route('index')],
             ['label' => 'Forum', 'url' => route('forum.index')],
         ];
-
+    
         $threads = $this->getThreadsQuery()->paginate(10);
         $tags = ThreadTag::all();
         $recentActivities = $this->getRecentActivities();
         $topContributors = $this->getTopContributors();
         $categories = ForumCategory::all();
-
-        return $this->view('forum.index', compact('threads', 'tags', 'recentActivities', 'topContributors', 'categories', 'breadcrumbs'));
+    
+        // Set $hideCategories to false for index view
+        $hideCategories = false;
+    
+        return $this->view('forum.index', compact('threads', 'tags', 'recentActivities', 'topContributors', 'categories', 'breadcrumbs', 'hideCategories'));
     }
+    
 
     /**
      * Display the specified thread.
@@ -87,22 +91,25 @@ class ForumController extends Controller
     public function category($slug)
     {
         $category = ForumCategory::where('slug', $slug)->firstOrFail();
-
+    
         $breadcrumbs = [
             ['label' => 'Home', 'url' => route('index')],
             ['label' => 'Forum', 'url' => route('forum.index')],
             ['label' => $category->name, 'url' => route('forum.category', $category->slug)],
         ];
-
+    
         $threads = $this->getThreadsQuery()->where('category_id', $category->id)->paginate(10);
         $tags = ThreadTag::all();
         $recentActivities = $this->getRecentActivities();
         $topContributors = $this->getTopContributors();
         $categories = ForumCategory::all();
-
-        return $this->view('forum.index', compact('threads', 'tags', 'category', 'categories', 'recentActivities', 'topContributors', 'breadcrumbs'));
+    
+        // Set a flag to hide categories section
+        $hideCategories = true;
+    
+        return $this->view('forum.index', compact('threads', 'tags', 'category', 'categories', 'recentActivities', 'topContributors', 'breadcrumbs', 'hideCategories'));
     }
-
+    
     /**
      * Show the form for creating a new thread.
      */

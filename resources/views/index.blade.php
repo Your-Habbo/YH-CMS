@@ -2,9 +2,8 @@
 
 @section('title', 'YourHabbo Homepage')
 
-@section('content')
-<main class="container mx-auto px-4 py-8">
-<div class="max-w-[1250px] mx-auto">
+
+<div class="max-w-[1250px] mx-auto mt-[-20px]">
     <div class="flex flex-col lg:flex-row lg:space-x-6">
         <!-- Main content area (70%) -->
         <div class="w-full lg:w-[70%] space-y-6">
@@ -154,7 +153,7 @@
         </div>
     </div>
     </div>
-</main>
+
 
 
 @section('scripts')

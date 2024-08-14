@@ -2,21 +2,21 @@
 
 namespace App\Http\Traits;
 
+use Illuminate\Http\JsonResponse;
+
 trait PjaxTrait
 {
     protected function view($view, $data = [])
     {
-        if (request()->header('X-PJAX') || request()->ajax()) {
-            return view($view, $data)->render();
+        if (request()->ajax() || request()->header('X-PJAX')) {
+            $html = view($view, $data)->render();
+            return new JsonResponse([
+                'html' => $html,
+                'url' => request()->url(),
+                'title' => $data['title'] ?? config('app.name')
+            ]);
         }
     
-        // Check if the content is already loaded, if not, load the appropriate view
-        if (view()->exists('layouts.app')) {
-            return view('layouts.app')->with('content', view($view, $data));
-        }
-    
-        // Fallback if the view does not exist
         return view('layouts.app')->with('content', view($view, $data));
     }
-    
 }

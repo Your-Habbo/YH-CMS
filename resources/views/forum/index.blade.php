@@ -18,6 +18,7 @@ function getAvatarUrl($avatarConfig) {
         @component('components.breadcrumbs', ['breadcrumbs' => $breadcrumbs])
         @endcomponent
         <!-- Categories Section -->
+        @unless($hideCategories)
         <div class="categories-section grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-6">
             @foreach($categories as $category)
                 <a href="{{ route('forum.category', $category->slug) }}" class="category-card flex flex-col items-center bg-white p-2 sm:p-3 rounded-lg shadow hover:shadow-lg transition transform hover:scale-105">
@@ -25,8 +26,14 @@ function getAvatarUrl($avatarConfig) {
                     <h4 class="text-xs sm:text-sm font-bold text-center">{{ $category->name }}</h4>
                 </a>
             @endforeach
-        </div>
+            @isset($category)
+        <a href="{{ route('forum.index') }}" class="back-button bg-blue-500 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition">
+            &larr; Back to Forum
+        </a>
+    @endisset
 
+        </div>
+        @endunless
         <div class="w-full flex flex-col lg:flex-row">
             <!-- Main Section - full width on mobile, 70% on larger screens -->
             <div class="w-full lg:w-[70%] lg:pr-6 mb-6 lg:mb-0">
