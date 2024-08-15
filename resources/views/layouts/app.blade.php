@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'YourHabbo')</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{ asset('assets/img/apple-touch-icon.png{') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{ asset('assets/img/avicon-16x16.png') }}">
+    <link rel="manifest" href="/site.webmanifest">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
 
@@ -53,9 +57,15 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on('click', 'a:not([data-no-pjax])', function(event) {
-        event.preventDefault();
+    $(document).on('click', 'a', function(event) {
         var url = $(this).attr('href');
+
+        // Check if the link has the data-no-pjax attribute
+        if ($(this).data('no-pjax')) {
+            return true; // Allow default behavior (full page load)
+        }
+
+        event.preventDefault();
         loadContent(url);
     });
 
@@ -133,6 +143,8 @@ $(document).ready(function() {
 
     initializePage();
 });
+
+
 
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>

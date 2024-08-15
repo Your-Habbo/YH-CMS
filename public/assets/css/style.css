@@ -54,34 +54,96 @@ main {
 
 
 @keyframes moveCloudRight {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100vw); }
+    0% { transform: translateX(-100vw); } /* Start off-screen to the left */
+    100% { transform: translateX(100vw); } /* Move off-screen to the right */
 }
 
 @keyframes moveCloudLeft {
-    0% { transform: translateX(100vw); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(100vw); } /* Start off-screen to the right */
+    100% { transform: translateX(-100vw); } /* Move off-screen to the left */
 }
 
 .cloud {
     position: absolute;
-    opacity: 0.7;
+    opacity: 1;
     filter: drop-shadow(0px 1px 1px #1a1a1a);
+    transform: translateX(-100vw); /* Start all clouds off-screen to the left */
 }
 
 .cloud-back { z-index: 1; }
 .cloud-front { z-index: 3; }
 
-.cloud1 { animation: moveCloudRight 80s linear infinite; top: 100%; width: 180px; }
-.cloud2 { animation: moveCloudLeft 100s linear infinite; top: 40%; width: 220px; }
-.cloud3 { animation: moveCloudRight 120s linear infinite; top: 70%; width: 160px; }
-.cloud4 { animation: moveCloudLeft 90s linear infinite; top: 25%; width: 200px; }
-.cloud5 { animation: moveCloudRight 110s linear infinite; top: 55%; width: 240px; }
+.cloud1 {
+    animation: moveCloudLeft 1000s linear infinite;
+    top: 60%;
+    width: 43px;
+    animation-delay: 0s;
+}
+.cloud2 {
+    animation: moveCloudLeft 800s linear infinite;
+    top: 40%;
+    width: 67px;
+    animation-delay: 10s;
+}
+.cloud3 {
+    animation: moveCloudRight 600s linear infinite;
+    top: 20%;
+    width: 50px;
+    animation-delay: 5s;
+}
+.cloud4 {
+    animation: moveCloudRight 1200s linear infinite;
+    top: 55%;
+    width: 90px;
+    animation-delay: 15s;
+}
+
+.cloud5 {
+    animation: moveCloudLeft 600s linear infinite;
+    top: 40%;
+    width: 90px;
+    animation-delay: 20s;
+}
+.cloud6 {
+    animation: moveCloudRight 1200s linear infinite;
+    top: 70%;
+    width: 40px;
+    animation-delay: 7s;
+}
+.cloud7 {
+    animation: moveCloudRight 900s linear infinite;
+    top: 50%;
+    width: 50px;
+    animation-delay: 12s;
+}
+.cloud8 {
+    animation: moveCloudLeft 600s linear infinite;
+    top: 40%;
+    width: 50px;
+    animation-delay: 25s;
+}
+.cloud9 {
+    animation: moveCloudRight 1400s linear infinite;
+    top: 60%;
+    width: 60px;
+    animation-delay: 18s;
+}
+.cloud10 {
+    animation: moveCloudRight 900s linear infinite;
+    top: 65%;
+    width: 90px;
+    animation-delay: 30s;
+}
+
+
+
 
 .hotel-image {
     position: absolute;
     left: 35%;
     bottom: 0;
+    z-index: 2;
+    object-position: 0px 100px; 
     transform: translateX(-50%);
    
 }

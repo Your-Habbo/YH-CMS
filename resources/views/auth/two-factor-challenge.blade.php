@@ -37,21 +37,9 @@
                     </div>
                 </form>
 
-                <!-- Debugging Information -->
-                <div class="mt-6">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Debugging Information</h3>
-                    <div class="mt-2 text-sm text-gray-600">
-                        <p>CSRF Token: {{ csrf_token() }}</p>
-                        <p>Session ID: {{ session()->getId() }}</p>
-                        <p>Auth User ID: {{ auth()->user()->id ?? 'Guest' }}</p>
-                        <p>Session Data: {{ json_encode(session()->all()) }}</p>
-                    </div>
-                </div>
-                <!-- End Debugging Information -->
             </div>
         </div>
     </div>
 
-    <script src="{{ mix('js/app.js') }}"></script>
 </body>
 </html>

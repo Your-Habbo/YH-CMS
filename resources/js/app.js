@@ -1,3 +1,5 @@
 // Import necessary dependencies
-import './bootstrap';  
+import './bootstrap';
+import NProgress from 'nprogress';
+
 

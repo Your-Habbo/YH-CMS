@@ -1,90 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body>
-    <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <img class="mx-auto h-10 w-auto" src="https://www.svgrepo.com/show/301692/login.svg" alt="Workflow">
-            <h2 class="mt-6 text-center text-3xl leading-9 font-extrabold text-gray-900">
-                Create a new account
-            </h2>
-            <p class="mt-2 text-center text-sm leading-5 text-gray-500 max-w">
-                Or
-                <a href="{{ route('login') }}"
-                    class="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline transition ease-in-out duration-150">
-                    login to your account
-                </a>
-            </p>
-        </div>
+@extends('layouts.auth')
 
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form method="POST" action="{{ route('register') }}">
-                    @csrf
-                    <div>
-                        <label for="username" class="block text-sm font-medium leading-5 text-gray-700">Username</label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="username" name="username" type="text" required autofocus placeholder="johndoe"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
+@section('title', 'Sign In')
+
+@section('content')
+
+
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md ">
+        <div class="bg-white py-8 px-5 shadow sm:rounded-lg sm:px-10" style="filter: drop-shadow(14px 10px 10px #4a4a4a);">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md mb-4">
+        <h2 class="mt-6 text-center text-xl leading-9 font-extrabold text-gray-900">
+            Create a new account
+        </h2>
+        <p class="mt-2 text-center text-sm leading-5 text-gray-500 max-w">
+            Or
+            <a href="{{ route('login') }}"
+               class="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline transition ease-in-out duration-150 text-xs">
+                login to your account
+            </a>
+        </p>
+    </div>
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
+
+                <div class="grid grid-cols-1 gap-5">
+                    <div class="relative w-full">
+                        <input type="text" id="username" name="username" required autofocus
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0
+                               @error('username') border-red-500 @enderror" placeholder=" " value="{{ old('username') }}" />
+                        <label for="username" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
+                            Enter Your Username
+                        </label>
+                        @error('username')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div class="mt-6">
-                        <label for="name" class="block text-sm font-medium leading-5 text-gray-700">
+                    <div class="relative w-full">
+                        <input type="text" id="name" name="name" placeholder="John Doe"
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0" />
+                        <label for="name" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
                             Display Name (Optional)
                         </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="name" name="name" type="text" placeholder="John Doe"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
                     </div>
 
-                    <div class="mt-6">
-                        <label for="dob" class="block text-sm font-medium leading-5 text-gray-700">
+                    <div class="relative w-full">
+                        <input type="date" id="dob" name="dob"
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0" />
+                        <label for="dob" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
                             Date of Birth (Optional)
                         </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="dob" name="dob" type="date"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
                     </div>
 
-                    <div class="mt-6">
-                        <label for="email" class="block text-sm font-medium leading-5 text-gray-700">
-                            Email address
+                    <div class="relative w-full">
+                        <input type="email" id="email" name="email" required
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0
+                               @error('email') border-red-500 @enderror" placeholder=" " value="{{ old('email') }}" />
+                        <label for="email" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
+                            Enter Your Email Address
                         </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="email" name="email" type="email" required placeholder="user@example.com"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
+                        @error('email')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div class="mt-6">
-                        <label for="email_confirmation" class="block text-sm font-medium leading-5 text-gray-700">
-                            Confirm Email address
+                    <div class="relative w-full">
+                        <input type="email" id="email_confirmation" name="email_confirmation" required
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0
+                               @error('email_confirmation') border-red-500 @enderror" placeholder=" " />
+                        <label for="email_confirmation" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
+                            Confirm Your Email Address
                         </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="email_confirmation" name="email_confirmation" type="email" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
+                        @error('email_confirmation')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div class="mt-6">
-                        <label for="password" class="block text-sm font-medium leading-5 text-gray-700">
-                            Password
+                    <div class="relative w-full">
+                        <input type="password" id="password" name="password" required
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0
+                               @error('password') border-red-500 @enderror" placeholder=" " />
+                        <label for="password" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300 ">
+                            Enter Your Password
                         </label>
-                        <div class="mt-1 rounded-md shadow-sm">
-                            <input id="password" name="password" type="password" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
-                        <p class="mt-2 text-sm text-gray-600">
+                        @error('password')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
+                        <p class="mt-2 text-xs text-gray-600">
                             Password must be at least 8 characters and contain:
-                            <ul class="list-disc list-inside">
+                            <ul class="list-disc list-inside text-xs">
                                 <li>At least one uppercase letter</li>
                                 <li>At least one lowercase letter</li>
                                 <li>At least one number</li>
@@ -93,29 +97,31 @@
                         </p>
                     </div>
 
-                    <div class="mt-6">
-                        <label for="password_confirmation" class="block text-sm font-medium leading-5 text-gray-700">
-                            Confirm Password
+                    <div class="relative w-full">
+                        <input type="password" id="password_confirmation" name="password_confirmation" required
+                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0
+                               @error('password_confirmation') border-red-500 @enderror" placeholder=" " />
+                        <label for="password_confirmation" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
+                            Confirm Your Password
                         </label>
-                        <div class="mt-1 rounded-md shadow-sm">
-                            <input id="password_confirmation" name="password_confirmation" type="password" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                        </div>
+                        @error('password_confirmation')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div class="mt-6">
+                    <div>
                         <span class="block w-full rounded-md shadow-sm">
                             <button type="submit"
-                                class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                                    class="shrink-0 inline-block w-full rounded-lg bg-gray-600 py-2 font-bold text-white text-xs hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Register
                             </button>
                         </span>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 
-    <script src="{{ mix('js/app.js') }}"></script>
-</body>
-</html>
+
+
+@endsection
