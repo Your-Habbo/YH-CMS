@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
+use App\Models\Forum\ForumPost;
+
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -124,5 +128,14 @@ class User extends Authenticatable
     public function unreadNotifications()
     {
         return $this->notifications()->whereNull('read_at');
+    }
+    public function forumPosts(): HasMany
+    {
+        return $this->hasMany(\App\Models\Forum\ForumPost::class);
+    }
+
+    public function getForumPostCountAttribute()
+    {
+        return $this->forumPosts()->count();
     }
 }

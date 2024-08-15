@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 
 <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div class="flex flex-col lg:flex-row">
@@ -97,9 +95,3 @@
             </div>
         </div>
     </main>
-
-@endsection
-
-@push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-@endpush

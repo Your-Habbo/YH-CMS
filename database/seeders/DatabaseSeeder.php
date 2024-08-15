@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ForumThreadSeeder::class,
             NewsSeeder::class,
+            RolesAndPermissionsSeeder::class,
         ]);
     }
 }

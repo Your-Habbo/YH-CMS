@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Profile Header -->
@@ -141,4 +139,3 @@
         </div>
     </div>
 </main>
-@endsection

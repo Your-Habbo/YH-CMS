@@ -22,15 +22,11 @@ function getAvatarUrl($avatarConfig) {
         <div class="categories-section grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-6">
             @foreach($categories as $category)
                 <a href="{{ route('forum.category', $category->slug) }}" class="category-card flex flex-col items-center bg-white p-2 sm:p-3 rounded-lg shadow hover:shadow-lg transition transform hover:scale-105">
-                    <img src="" alt="{{ $category->name }} image" class="w-full h-16 sm:h-20 object-cover mb-2 rounded">
+                <img src="{{ $category->image }}" alt="{{ $category->name }} image" class="w-full h-16 sm:h-20 object-cover mb-2 rounded">
                     <h4 class="text-xs sm:text-sm font-bold text-center">{{ $category->name }}</h4>
                 </a>
             @endforeach
-            @isset($category)
-        <a href="{{ route('forum.index') }}" class="back-button bg-blue-500 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition">
-            &larr; Back to Forum
-        </a>
-    @endisset
+
 
         </div>
         @endunless
@@ -39,10 +35,10 @@ function getAvatarUrl($avatarConfig) {
             <div class="w-full lg:w-[70%] lg:pr-6 mb-6 lg:mb-0">
                 <div class="card">
                     <div class="card-header blue flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <h3 class="flex items-center mb-2 sm:mb-0 text-base sm:text-lg">
+                        <h4>
                             <i class="fas fa-comments mr-2"></i>
                             Discussion
-                        </h3>
+                        </h4>
                     </div>
                     <div class="card-content">
                         <div class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between mb-4">
@@ -139,7 +135,7 @@ function getAvatarUrl($avatarConfig) {
                 <!-- Tag Categories -->
                 <div class="card mb-4">
                     <div class="card-header pastel-mint">
-                        <h4 class="text-sm"><i class="fas fa-tags mr-2"></i>Popular Tags</h4>
+                        <h4><i class="fas fa-tags mr-2"></i>Popular Tags</h4>
                     </div>
                     <div class="card-content p-4">
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4">

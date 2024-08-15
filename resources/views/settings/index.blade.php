@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="max-w-6xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">Account Settings</h1>
@@ -131,23 +129,3 @@
         </div>
     </div>
 </main>
-
-<script>
-function openTab(evt, tabName) {
-    var i, tabContent, tabLinks;
-    tabContent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabContent.length; i++) {
-        tabContent[i].style.display = "none";
-    }
-    tabLinks = document.getElementsByTagName("a");
-    for (i = 0; i < tabLinks.length; i++) {
-        tabLinks[i].className = tabLinks[i].className.replace(" text-blue-600 border-blue-600", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " text-blue-600 border-blue-600";
-}
-
-// Open the first tab by default
-document.getElementsByTagName("a")[0].click();
-</script>
-@endsection

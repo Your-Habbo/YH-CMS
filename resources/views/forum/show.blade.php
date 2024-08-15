@@ -43,7 +43,7 @@ function getAvatarUrl($avatarConfig) {
                             <img src="{{ getAvatarUrl($thread->user->avatar_config ?? 'default_avatar_config') }}" alt="{{ $thread->user->name ?? 'Default Avatar' }}'s Avatar" class="w-12 h-12 rounded-full border-2 border-white mr-2">
                             <div class="text-white">
                                 <h4 class="text-xs font-bold truncate">{{ $thread->user->name }}</h4>
-                                <p class="text-xxs truncate">{{ $thread->user->role ?? 'Member' }}</p>
+                                <p class="text-xxs truncate">{{ $thread->user->roles->pluck('name')->map(function($role) { return ucwords($role); })->implode(', ') ?? 'Member' }}</p>
                             </div>
                         </div>
                     </div>
@@ -143,16 +143,17 @@ function getAvatarUrl($avatarConfig) {
                         <img src="{{ getAvatarUrl($post->user->avatar_config ?? 'default_avatar_config') }}" alt="{{ $post->user->name ?? 'Default Avatar' }}'s Avatar" class="w-10 h-10 rounded-full mr-2">
                         <div>
                             <h5 class="text-xs font-bold truncate">{{ $post->user->name }}</h5>
-                            <p class="text-xxs text-gray-600 truncate">{{ $post->user->role ?? 'Member' }}</p>
+                            <p class="text-xxs text-gray-600 truncate">{{ $post->user->roles->pluck('name')->implode(', ') ?? 'Member' }}</p>
                         </div>
                     </div>
                     <div class="text-xxs text-gray-600">
                         <p class="mb-1">
                             <span class="inline-block w-4 h-4 rounded-full mr-1 {{ $post->user->is_online ? 'bg-green-500' : 'bg-gray-300' }}"></span>
-                            {{ $post->user->is_online ? 'Online' : 'Offline' }}
+                            {{ $post->user->roles->pluck('name')->map(function($role) { return ucwords($role); })->implode(', ') ?? 'Member' }}
                         </p>
-                        <p class="mb-1"><span class="font-semibold">Posts:</span> {{ $post->user->posts_count ?? 0 }}</p>
-                        <p class="mb-1"><span class="font-semibold">Points:</span> {{ $post->user->points ?? 0 }}</p>
+                        <p class="mb-1"><span class="font-semibold">Posts:</span> {{ $thread->user->forum_post_count ?? 0 }}</p>
+                        <p class="mb-1"><span class="font-semibold">Points:</span> {{ $thread->user->contribution_points ?? 0 }}</p>
+
                     </div>
                 </div>
             </div>

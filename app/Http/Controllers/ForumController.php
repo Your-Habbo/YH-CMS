@@ -54,20 +54,32 @@ class ForumController extends Controller
      */
     public function show($slug)
     {
-        $thread = ForumThread::where('slug', $slug)->with('user', 'category', 'tags', 'posts.user')->firstOrFail();
-
+        $thread = ForumThread::where('slug', $slug)
+            ->with([
+                'user.roles',
+                'category',
+                'tags',
+                'posts.user.roles',
+                'posts.user' => function ($query) {
+                    $query->withCount('forumPosts'); // Eager load post count
+                }
+            ])
+            ->firstOrFail();
+    
         $breadcrumbs = [
             ['label' => 'Home', 'url' => route('index')],
             ['label' => 'Forum', 'url' => route('forum.index')],
             ['label' => $thread->category->name, 'url' => route('forum.category', $thread->category->slug)],
             ['label' => $thread->title, 'url' => route('forum.show', $thread->slug)],
         ];
-
+    
         $thread->increment('view_count');
-
+    
         return $this->view('forum.show', compact('thread', 'breadcrumbs'));
     }
+    
 
+    
     /**
      * Display threads filtered by a specific tag.
      */
