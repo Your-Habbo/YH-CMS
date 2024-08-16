@@ -14,8 +14,14 @@ use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
-use App\Http\Controllers\Admin\DashboardController;
 
+
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ImageController;
+use App\Http\Controllers\Admin\ForumCategoryController;
+use App\Http\Controllers\Admin\ThreadTagController;
+use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 // Public routes
 Route::middleware('web')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('index');
@@ -58,12 +64,12 @@ Route::middleware('web')->group(function () {
         })->name('dashboard');
 
         Route::prefix('user/two-factor')->name('two-factor.')->group(function () {
-            Route::get('/', [TwoFactorController::class, 'index'])->name('index');
-            Route::get('/choose', [TwoFactorController::class, 'choose'])->name('choose');
-            Route::match(['get', 'post'], '/token', [TwoFactorController::class, 'enableToken'])->name('enable-token');
-            Route::post('/token/confirm', [TwoFactorController::class, 'confirmToken'])->name('confirm-token');
-            Route::get('/recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes');
-            Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable');
+          //  Route::get('/', [TwoFactorController::class, 'index'])->name('index');
+          //  Route::get('/choose', [TwoFactorController::class, 'choose'])->name('choose');
+          //  Route::match(['get', 'post'], '/token', [TwoFactorController::class, 'enableToken'])->name('enable-token');
+          //  Route::post('/token/confirm', [TwoFactorController::class, 'confirmToken'])->name('confirm-token');
+           // Route::get('/recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes');
+          //  Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable');
         });
 
         Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.challenge');
@@ -107,8 +113,23 @@ Route::middleware('web')->group(function () {
     });
 
     // Admin routes
-    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'can:view admin dashboard'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        // Additional admin routes can be added here.
+        Route::resource('/users', UserController::class)->middleware('can:view admin dashboard');
+        Route::resource('/images', ImageController::class)->except(['show', 'edit', 'update']);
+        Route::delete('images/bulk-delete', [ImageController::class, 'bulkDelete'])->name('images.bulkDelete');
+        Route::resource('/news', AdminNewsController::class);
+        Route::post('/news/preview', [AdminNewsController::class, 'preview'])->name('news.preview');
+
+        Route::resource('/forum/forum-categories', ForumCategoryController::class);
+        
+
+        // Forum tag management (manual route definitions)
+        Route::get('/forum/forum-tags', [ThreadTagController::class, 'index'])->name('forum-tags.index');
+        Route::get('/forum/forum-tags/create', [ThreadTagController::class, 'create'])->name('forum-tags.create');
+        Route::post('/forum/forum-tags', [ThreadTagController::class, 'store'])->name('forum-tags.store');
+        Route::get('/forum/forum-tags/{id}/edit', [ThreadTagController::class, 'edit'])->name('forum-tags.edit');
+        Route::put('/forum/forum-tags/{id}', [ThreadTagController::class, 'update'])->name('forum-tags.update');
+        Route::delete('forum-tags/{id}', [ThreadTagController::class, 'destroy'])->name('forum-tags.destroy');
     });
 });

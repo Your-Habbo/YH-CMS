@@ -22,10 +22,26 @@
         <h2 class="font-bold text-white">Featured News</h2>
     </div>
     <div class="card-content p-4">
-        <div x-data="carousel()" x-init="startAutoRotation()">
-            <div class="relative overflow-hidden rounded-lg" style="padding-bottom: 41.67%;">
-                @foreach($featuredNews as $index => $article)
-                    <a href="{{ route('news.show', $article->slug) }}" class="absolute inset-0 w-full h-full group" x-show.immediate="activeSlide === {{ $index }}" x-cloak>
+        <div x-data="{
+        activeSlide: 0,
+        totalSlides: {{ $featuredNews->count() }},
+        startAutoRotation() {
+            setInterval(() => {
+                this.activeSlide = (this.activeSlide + 1) % this.totalSlides;
+            }, 5000);
+        }
+    }" x-init="startAutoRotation()">
+        <div class="relative overflow-hidden rounded-lg" style="padding-bottom: 41.67%;">
+            @foreach($featuredNews as $index => $article)
+                <div x-show="activeSlide === {{ $index }}"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform scale-90"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-300"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-90"
+                    class="absolute inset-0 w-full h-full">
+                    <a href="{{ route('news.show', $article->slug) }}" class="block w-full h-full group">
                         @if($article->image)
                             <img src="{{ asset('storage/' . $article->image) }}" alt="{{ $article->title }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                         @else
@@ -34,29 +50,26 @@
                             </div>
                         @endif
                         <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent text-white p-4">
-                            <div class="flex justify-between items-end">
-                                <div class="flex-grow">
-                                    <h3 class="text-xl font-bold mb-2 group-hover:underline">{{ $article->title }}</h3>
-                                    <p class="text-sm line-clamp-2 mb-2">{{ Str::limit($article->content, 100) }}</p>
-                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm transition-colors duration-200">
-                                        Read More
-                                    </button>
-                                </div>
-                                <div class="flex space-x-2 ml-4">
-                                    @foreach($featuredNews as $i => $item)
-                                        <button @click.stop="activeSlide = {{ $i }}" 
-                                                class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs focus:outline-none transition-colors duration-200"
-                                                :class="{ 'bg-white text-blue-600': activeSlide === {{ $i }}, 'bg-transparent text-white hover:bg-white/50': activeSlide !== {{ $i }} }">
-                                            {{ $i + 1 }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                            </div>
+                            <h3 class="text-xl font-bold mb-2 group-hover:underline">{{ $article->title }}</h3>
+                            <p class="text-sm line-clamp-2 mb-2">{{ Str::limit($article->content, 100) }}</p>
+                            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm transition-colors duration-200">
+                                Read More
+                            </button>
                         </div>
                     </a>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
+        <!-- Pagination buttons -->
+        <div class="flex space-x-2 mt-4 justify-center">
+            @foreach($featuredNews as $i => $item)
+                <button @click="activeSlide = {{ $i }}" 
+                        class="w-3 h-3 rounded-full focus:outline-none transition-colors duration-200"
+                        :class="{ 'bg-blue-600': activeSlide === {{ $i }}, 'bg-gray-300': activeSlide !== {{ $i }} }">
+                </button>
+            @endforeach
+        </div>
+    </div>
     </div>
 </div>
 
@@ -175,6 +188,9 @@ function carousel() {
             setInterval(() => {
                 this.activeSlide = (this.activeSlide + 1) % this.totalSlides;
             }, 5000); // Change slide every 5 seconds
+        },
+        init() {
+            this.startAutoRotation();
         }
     }
 }

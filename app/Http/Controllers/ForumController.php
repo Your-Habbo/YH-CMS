@@ -61,7 +61,7 @@ class ForumController extends Controller
                 'tags',
                 'posts.user.roles',
                 'posts.user' => function ($query) {
-                    $query->withCount('forumPosts'); // Eager load post count
+                    $query->withCount('forumPosts');
                 }
             ])
             ->firstOrFail();

@@ -43,7 +43,7 @@ function getAvatarUrl($avatarConfig) {
                             <img src="{{ getAvatarUrl($thread->user->avatar_config ?? 'default_avatar_config') }}" alt="{{ $thread->user->name ?? 'Default Avatar' }}'s Avatar" class="w-12 h-12 rounded-full border-2 border-white mr-2">
                             <div class="text-white">
                                 <h4 class="text-xs font-bold truncate">{{ $thread->user->name }}</h4>
-                                <p class="text-xxs truncate">{{ $thread->user->roles->pluck('name')->map(function($role) { return ucwords($role); })->implode(', ') ?? 'Member' }}</p>
+                                <p class="text-xxs truncate">{{ $thread->user->roles->pluck('name')->map(function($role) { return ucwords($role); })->implode(', ') ?? 'N/A' }}</p>
                             </div>
                         </div>
                     </div>

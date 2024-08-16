@@ -9,7 +9,8 @@ class ForumCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'description'];
+    // Add 'image' to the fillable array
+    protected $fillable = ['name', 'slug', 'description', 'image'];
 
     public function threads()
     {
