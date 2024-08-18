@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,6 +11,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Forum\ForumThread;
 use App\Models\Forum\ForumPost;
 
 
@@ -29,6 +31,9 @@ class User extends Authenticatable
         'password',
         'avatar_config',
         'dob',
+        'mot',
+        'forum_signature',
+        'profile_banner', 
     ];
 
     /**
@@ -138,4 +143,17 @@ class User extends Authenticatable
     {
         return $this->forumPosts()->count();
     }
+
+
+    // Define the relationship with ForumThread
+    public function forumThreads()
+    {
+        return $this->hasMany(ForumThread::class, 'user_id');
+    }
+
+    public function habboLink(): HasOne
+    {
+        return $this->hasOne(UserHabboLink::class);
+    }
+
 }

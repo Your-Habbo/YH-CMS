@@ -1,9 +1,32 @@
-// Import necessary dependencies
 import './bootstrap';
+
 import NProgress from 'nprogress';
-import Alpine from 'alpinejs'
+import 'nprogress/nprogress.css';
 
-Alpine.start()
+import 'flowbite';
 
-// If you want Alpine's instance to be available everywhere.
-window.Alpine = Alpine
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
+import Alpine from 'alpinejs';
+Alpine.start();
+window.Alpine = Alpine;
+
+// Import the PJAX script
+import './pjax-script';
+
+// Test jQuery
+$(document).ready(function() {
+    console.log('jQuery is working!');
+});
+
+// Test NProgress
+NProgress.start();
+setTimeout(() => NProgress.done(), 1000);
+
+// Test Alpine
+document.addEventListener('alpine:init', () => {
+    Alpine.data('testData', () => ({
+        message: 'Alpine.js is working!'
+    }));
+});

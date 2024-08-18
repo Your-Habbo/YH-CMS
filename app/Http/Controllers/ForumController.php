@@ -6,7 +6,14 @@ use App\Http\Traits\PjaxTrait;
 use App\Models\Forum\ForumThread;
 use App\Models\Forum\ForumCategory;
 use App\Models\Forum\ThreadTag;
+use App\Models\Forum\ForumPost;
+use App\Models\Forum\PostEditHistory;
+use App\Models\Forum\ThreadEditHistory;
+use App\Models\Forum\ThreadLike; // Correct namespace
+use App\Models\Forum\PostLike;  
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\Admin\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
@@ -62,9 +69,20 @@ class ForumController extends Controller
                 'posts.user.roles',
                 'posts.user' => function ($query) {
                     $query->withCount('forumPosts');
-                }
+                },
+                'posts.likes',
+                'likes'
             ])
             ->firstOrFail();
+    
+        // Check if the current user has liked the thread
+        $userHasLikedThread = $thread->likes()->where('user_id', auth()->id())->exists();
+    
+        // Check if the current user has liked each post in the thread
+        $postsWithUserLikes = $thread->posts->map(function ($post) {
+            $post->userHasLiked = $post->likes()->where('user_id', auth()->id())->exists();
+            return $post;
+        });
     
         $breadcrumbs = [
             ['label' => 'Home', 'url' => route('index')],
@@ -75,10 +93,9 @@ class ForumController extends Controller
     
         $thread->increment('view_count');
     
-        return $this->view('forum.show', compact('thread', 'breadcrumbs'));
+        return $this->view('forum.show', compact('thread', 'postsWithUserLikes', 'breadcrumbs', 'userHasLikedThread'));
     }
     
-
     
     /**
      * Display threads filtered by a specific tag.
@@ -127,11 +144,18 @@ class ForumController extends Controller
      */
     public function create()
     {
+        // Log that the create method was hit
+        Log::info('ForumController@create method was called.');
+    
         $categories = ForumCategory::all();
         $tags = ThreadTag::all();
+    
+        // Log data retrieved from the database
+        Log::info('Categories retrieved:', ['categories' => $categories]);
+        Log::info('Tags retrieved:', ['tags' => $tags]);
+    
         return $this->view('forum.create', compact('categories', 'tags'));
     }
-
     /**
      * Store a newly created thread in the database.
      */
@@ -357,9 +381,7 @@ class ForumController extends Controller
         return response()->json($history);
     }
 
-    /**
-     * Show the edit history of a post.
-     */
+    /** Show the edit history of a post. */
     public function showEditHistory(ForumPost $post)
     {
         if (!Gate::allows('view-post', $post)) {
@@ -370,13 +392,23 @@ class ForumController extends Controller
         return $this->view('forum.edit-history', compact('post', 'editHistory'));
     }
 
-    /**
-     * Like a thread.
-     */
+    /** Like a thread. */
     public function likeThread(ForumThread $thread)
     {
-        $thread->increment('likes_count');
-        return response()->json(['likes_count' => $thread->likes_count]);
+        $like = $thread->likes()->where('user_id', auth()->id())->first();
+
+        if ($like) {
+            $like->delete();
+            $thread->decrement('likes_count');
+            return response()->json(['likes_count' => $thread->likes_count, 'liked' => false]);
+        } else {
+            ThreadLike::create([
+                'thread_id' => $thread->id,
+                'user_id' => auth()->id(),
+            ]);
+            $thread->increment('likes_count');
+            return response()->json(['likes_count' => $thread->likes_count, 'liked' => true]);
+        }
     }
 
     /**
@@ -384,13 +416,23 @@ class ForumController extends Controller
      */
     public function likePost(ForumPost $post)
     {
-        $post->increment('likes_count');
-        return response()->json(['likes_count' => $post->likes_count]);
+        $like = $post->likes()->where('user_id', auth()->id())->first();
+
+        if ($like) {
+            $like->delete();
+            $post->decrement('likes_count');
+            return response()->json(['likes_count' => $post->likes_count, 'liked' => false]);
+        } else {
+            PostLike::create([
+                'post_id' => $post->id,
+                'user_id' => auth()->id(),
+            ]);
+            $post->increment('likes_count');
+            return response()->json(['likes_count' => $post->likes_count, 'liked' => true]);
+        }
     }
 
-    /**
-     * Unlike a post.
-     */
+    /** Unlike a post. */
     public function unlikePost(ForumPost $post)
     {
         if ($post->likes_count > 0) {
@@ -399,9 +441,7 @@ class ForumController extends Controller
         return response()->json(['likes_count' => $post->likes_count]);
     }
 
-    /**
-     * Unlike a thread.
-     */
+    /** Unlike a thread. */
     public function unlikeThread(ForumThread $thread)
     {
         if ($thread->likes_count > 0) {
@@ -410,9 +450,7 @@ class ForumController extends Controller
         return response()->json(['likes_count' => $thread->likes_count]);
     }
 
-    /**
-     * Get the query for retrieving threads.
-     */
+    /** Get the query for retrieving threads. */
     private function getThreadsQuery()
     {
         return ForumThread::with('user', 'category', 'tags', 'posts')
@@ -421,9 +459,7 @@ class ForumController extends Controller
             ->orderBy('created_at', 'desc');
     }
 
-    /**
-     * Get the top contributors in the forum.
-     */
+    /** Get the top contributors in the forum. */
     private function getTopContributors()
     {
         return User::orderBy('contribution_points', 'desc')
@@ -431,9 +467,7 @@ class ForumController extends Controller
                    ->get();
     }
 
-    /**
-     * Get the recent activities in the forum.
-     */
+    /** Get the recent activities in the forum. */
     private function getRecentActivities()
     {
         return ForumThread::with('user')

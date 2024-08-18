@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->priority([
             \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
-            // ... other middleware
+            \App\Http\Middleware\TwoFactorMiddleware::class,
         ]);
         $middleware->alias([
             '2fa' => \App\Http\Middleware\TwoFactorMiddleware::class,

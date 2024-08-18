@@ -5,12 +5,14 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\TrustedDevice;
 use Symfony\Component\HttpFoundation\Response;
 
 class TwoFactorMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
+        
         $user = $request->user();
 
         // Log user details and the current URL
@@ -25,6 +27,18 @@ class TwoFactorMiddleware
         // Proceed with request if user is not authenticated or does not have 2FA setup
         if (!$user || !$user->two_factor_secret) {
             Log::debug('Proceeding with request as user is not authenticated or does not have 2FA setup');
+            return $next($request);
+        }
+
+        // Check if the current device is trusted
+        $trustedDevice = TrustedDevice::where('user_id', $user->id)
+            ->where('device_ip', $request->ip())
+            ->where('device_agent', $request->header('User-Agent'))
+            ->first();
+
+        if ($trustedDevice) {
+            Log::debug('Device is trusted, skipping 2FA');
+            $request->session()->put('auth.two_factor_confirmed', true);
             return $next($request);
         }
 

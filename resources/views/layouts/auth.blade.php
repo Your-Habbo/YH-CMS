@@ -7,7 +7,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/site.webmanifest">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
 <div class="flex h-screen  items-center overflow-hidden">

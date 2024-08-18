@@ -5,6 +5,8 @@ namespace App\Models\Forum;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class ThreadEditHistory extends Model
 {

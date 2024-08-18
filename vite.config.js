@@ -11,6 +11,14 @@ export default defineConfig({
         }),
       
     ],
+    resolve: {
+        alias: {
+            '$': 'jquery',
+            'jquery': 'jquery',
+            'nprogress': 'nprogress',
+            'toastr': 'toastr',
+        },
+    },
     server: {
         host: '0.0.0.0',
         port: 5173,

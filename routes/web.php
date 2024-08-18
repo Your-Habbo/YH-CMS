@@ -1,27 +1,40 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\TwoFactorController;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
-use App\Http\Controllers\ForumController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\AvatarController;
-use App\Http\Controllers\NewsController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PageController;
+use App\Http\Controllers\Auth\TwoFactorAuthenticatedSessionController as CustomTwoFactorAuthenticatedSessionController;
 
+use App\Http\Controllers\{
+    ForumController, 
+    NotificationController, 
+    ProfileController,
+    PostController,
+    EventController,
+    AvatarController,
+    NewsController,
+    HomeController,
+    PageController,
+};
 
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\ImageController;
-use App\Http\Controllers\Admin\ForumCategoryController;
-use App\Http\Controllers\Admin\ThreadTagController;
-use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Settings\{
+    SettingsController,
+    ProfileController as SettingProfileController,
+    SettingsSecurityController,
+};
+
+use App\Http\Controllers\Admin\{
+    DashboardController,
+    UserController,
+    ImageController,
+    ForumDashboardController,
+    ForumCategoryController,
+    ThreadTagController,
+    NewsController as AdminNewsController,
+};
+
 // Public routes
 Route::middleware('web')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('index');
@@ -55,81 +68,129 @@ Route::middleware('web')->group(function () {
         Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
         Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
         Route::get('/two-factor-login', [TwoFactorAuthenticatedSessionController::class, 'create'])->name('two-factor.login');
-        Route::post('/two-factor-login', [TwoFactorAuthenticatedSessionController::class, 'store'])->name('two-factor.login.store');
+        Route::post('/two-factor-login', [CustomTwoFactorAuthenticatedSessionController::class, 'store'])->name('two-factor.login.store');
     });
 
-    Route::middleware(['auth', 'verified', '2fa'])->group(function () {
+    Route::middleware(['auth'])->group(function () {
+        Route::prefix('/two-factor')->name('two-factor.')->group(function () {
+            Route::get('/', [TwoFactorController::class, 'index'])->name('index');
+            Route::get('/setup', [TwoFactorController::class, 'enableToken'])->name('setup');
+            Route::post('/confirm', [TwoFactorController::class, 'confirmToken'])->name('confirm-token');
+            Route::get('/recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes-alt'); // Ensure this name is unique
+            Route::post('/disable', [TwoFactorController::class, 'disable'])->name('disable-alt');
+        });
+    });
+    
+    Route::middleware(['2fa'])->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard');
         })->name('dashboard');
 
-        Route::prefix('user/two-factor')->name('two-factor.')->group(function () {
-          //  Route::get('/', [TwoFactorController::class, 'index'])->name('index');
-          //  Route::get('/choose', [TwoFactorController::class, 'choose'])->name('choose');
-          //  Route::match(['get', 'post'], '/token', [TwoFactorController::class, 'enableToken'])->name('enable-token');
-          //  Route::post('/token/confirm', [TwoFactorController::class, 'confirmToken'])->name('confirm-token');
-           // Route::get('/recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes');
-          //  Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable');
-        });
-
         Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.challenge');
         Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
-    });
+ 
+        Route::middleware(['auth'])->group(function () {
 
-    Route::middleware(['auth'])->group(function () {
-        // Forum authenticated routes
-        Route::post('/forum', [ForumController::class, 'store'])->name('forum.store');
-        Route::post('/forum/{thread}/posts', [PostController::class, 'store'])->name('posts.store');
-        Route::get('user/avatar', [AvatarController::class, 'show'])->name('user.avatar');
-        Route::post('user/avatar', [AvatarController::class, 'store'])->name('user.avatar.store');
-        Route::get('/forum/search', [ForumController::class, 'search'])->name('forum.search');
-        Route::post('/forum/{thread}/mark-solution/{post}', [ForumController::class, 'markAsSolution'])->name('forum.markSolution');
-        Route::post('/forum/{thread}/mark-helpful', [ForumController::class, 'markAsHelpful'])->name('forum.markHelpful');
-        Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
-        Route::get('/forum/{thread}/edit', [ForumController::class, 'edit'])->name('threads.edit');
-        Route::put('/forum/{thread}', [ForumController::class, 'update'])->name('threads.update');
-        Route::post('/forum/posts/{post}/edit', [ForumController::class, 'editPost'])->name('forum.post.edit');
-        Route::get('/forum/posts/{post}/history', [ForumController::class, 'getPostEditHistory'])->name('forum.post.history');
-        Route::post('/forum/threads/{thread}/edit', [ForumController::class, 'editThread'])->name('forum.thread.edit');
-        Route::get('/forum/threads/{thread}/history', [ForumController::class, 'getThreadEditHistory'])->name('forum.thread.history');
-        Route::post('/threads/{thread}/like', [ForumController::class, 'likeThread'])->name('threads.like');
-        Route::post('/posts/{post}/like', [ForumController::class, 'likePost'])->name('posts.like');
-        Route::post('/posts/{post}/unlike', [ForumController::class, 'unlikePost'])->name('posts.unlike');
-        Route::post('/threads/{thread}/unlike', [ForumController::class, 'unlikeThread'])->name('threads.unlike');
+            Route::get('user/avatar', [AvatarController::class, 'show'])->name('user.avatar');
+            Route::post('user/avatar', [AvatarController::class, 'store'])->name('user.avatar.store');
 
-        // Notifications
-        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-        Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
-        Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+            Route::prefix('forum')->name('forum.')->group(function () {
+                // Forum authenticated routes
+                Route::post('/', [ForumController::class, 'store'])->name('store');
+                Route::post('/{thread}/posts', [PostController::class, 'store'])->name('posts.store');
+                Route::get('/search', [ForumController::class, 'search'])->name('search');
+                
+                Route::post('/{thread}/mark-solution/{post}', [ForumController::class, 'markAsSolution'])->name('markSolution');
+                Route::post('/{thread}/mark-helpful', [ForumController::class, 'markAsHelpful'])->name('markHelpful');
 
-        // Profile
-        Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+                Route::get('/thread/create/', [ForumController::class, 'create'])->name('create');
+                Route::get('/{thread}/edit', [ForumController::class, 'edit'])->name('threads.edit');
+                Route::put('/{thread}', [ForumController::class, 'update'])->name('threads.update');
 
-        // Settings
-        Route::get('/settings', [SettingsController::class, 'settings'])->name('settings.index');
+                Route::post('/posts/{post}/edit', [ForumController::class, 'editPost'])->name('post.edit');
+                Route::get('/posts/{post}/history', [ForumController::class, 'getPostEditHistory'])->name('post.history');
 
-        // Logout
-        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    });
+                Route::post('/threads/{thread}/edit', [ForumController::class, 'editThread'])->name('thread.edit');
+                Route::get('/threads/{thread}/history', [ForumController::class, 'getThreadEditHistory'])->name('thread.history');
+                
+                // Post like/unlike routes
+                Route::post('/posts/{post}/like', [ForumController::class, 'likePost'])->name('post.like');
+                Route::post('/posts/{post}/unlike', [ForumController::class, 'unlikePost'])->name('post.unlike');
 
-    // Admin routes
-    Route::middleware(['auth', 'can:view admin dashboard'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::resource('/users', UserController::class)->middleware('can:view admin dashboard');
-        Route::resource('/images', ImageController::class)->except(['show', 'edit', 'update']);
-        Route::delete('images/bulk-delete', [ImageController::class, 'bulkDelete'])->name('images.bulkDelete');
-        Route::resource('/news', AdminNewsController::class);
-        Route::post('/news/preview', [AdminNewsController::class, 'preview'])->name('news.preview');
+                // Thread like/unlike routes
+                Route::post('/threads/{thread}/like', [ForumController::class, 'likeThread'])->name('thread.like');
+                Route::post('/threads/{thread}/unlike', [ForumController::class, 'unlikeThread'])->name('thread.unlike');
+            });
 
-        Route::resource('/forum/forum-categories', ForumCategoryController::class);
-        
+            // Notifications
+            Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+            Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+            Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 
-        // Forum tag management (manual route definitions)
-        Route::get('/forum/forum-tags', [ThreadTagController::class, 'index'])->name('forum-tags.index');
-        Route::get('/forum/forum-tags/create', [ThreadTagController::class, 'create'])->name('forum-tags.create');
-        Route::post('/forum/forum-tags', [ThreadTagController::class, 'store'])->name('forum-tags.store');
-        Route::get('/forum/forum-tags/{id}/edit', [ThreadTagController::class, 'edit'])->name('forum-tags.edit');
-        Route::put('/forum/forum-tags/{id}', [ThreadTagController::class, 'update'])->name('forum-tags.update');
-        Route::delete('forum-tags/{id}', [ThreadTagController::class, 'destroy'])->name('forum-tags.destroy');
+            // Profile
+            Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+
+            // Settings
+            Route::get('/settings', [SettingsController::class, 'settings'])->name('settings.index');
+            Route::post('/settings/update-email', [SettingsController::class, 'updateEmail'])->name('settings.updateEmail');
+            Route::post('/settings/update-password', [SettingsController::class, 'updatePassword'])->name('settings.updatePassword');
+
+            // Profiles
+            Route::get('/settings/profile', [SettingProfileController::class, 'profile'])->name('settings.profile');
+            Route::post('/settings/profile/link-habbo', [SettingProfileController::class, 'linkHabbo'])->name('settings.linkHabbo');
+            Route::get('/settings/profile/check-habbo-status', [SettingProfileController::class, 'checkHabboStatus'])->name('settings.checkHabboStatus');
+            Route::get('/settings/profile/motd-code', [SettingProfileController::class, 'getMotdCode'])->name('settings.getMotdCode');
+            Route::post('/settings/profile/cancel-habbo-link', [SettingProfileController::class, 'cancelHabboLink'])->name('settings.cancelHabboLink');
+            Route::post('/settings/profile/remove-habbo-link', [SettingProfileController::class, 'removeHabboLink'])->name('settings.removeHabboLink');
+            Route::post('/settings/profile/update-mot', [SettingProfileController::class, 'updateMot'])->name('settings.updateMot');
+            Route::post('/settings/profile/update-forum-signature', [SettingProfileController::class, 'updateForumSignature'])->name('settings.updateForumSignature');
+            Route::post('/settings/profile/banner', [SettingProfileController::class, 'updateProfileBanner'])->name('settings.updateProfileBanner');
+
+            // Security settings routes
+            Route::prefix('settings/security')->middleware('auth')->group(function () {
+                Route::get('/', [SettingsSecurityController::class, 'index'])->name('settings.security.index');
+                Route::post('/update-login-alerts', [SettingsSecurityController::class, 'updateLoginAlerts'])->name('security.updateLoginAlerts');
+                Route::delete('/sessions/{id}', [SettingsSecurityController::class, 'logoutSession'])->name('security.logoutSession');
+                Route::delete('/trusted-devices/{id}', [SettingsSecurityController::class, 'removeTrustedDevice'])->name('security.removeTrustedDevice-alt'); // Unique name
+                Route::post('/toggle-2fa', [SettingsSecurityController::class, 'toggle2FA'])->name('security.toggle2FA');
+                Route::delete('/logout-session/{sessionId}', [SettingsSecurityController::class, 'logoutSession'])->name('security.logoutSession-alt'); // Unique name
+                Route::post('/logout-all-sessions', [SettingsSecurityController::class, 'logoutAllSessions'])->name('settings.logoutAllSessions');
+                Route::post('/two-factor/verify-password', [TwoFactorController::class, 'verifyPassword'])->name('two-factor.verify-password');
+                Route::post('/two-factor/reset-recovery-codes', [TwoFactorController::class, 'resetRecoveryCodes'])->name('two-factor.reset-recovery-codes');
+            });
+
+            Route::get('/settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
+            Route::post('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
+            Route::post('/settings/security', [SettingsController::class, 'updateSecurity'])->name('settings.updateSecurity');
+
+            Route::post('/email/verification-notification', function (Request $request) {
+                $request->user()->sendEmailVerificationNotification();
+                return back()->with('message', 'Verification link sent!');
+            })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+            // Logout
+            Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+            // Admin routes
+            Route::middleware(['can:view admin dashboard'])->prefix('admin')->name('admin.')->group(function () {
+                Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+                Route::resource('/users', UserController::class);
+                Route::patch('/users/{user}/restore', [UserController::class, 'restore'])->name('admin.users.restore');
+
+                Route::resource('/images', ImageController::class)->except(['show', 'edit', 'update']);
+                Route::delete('images/bulk-delete', [ImageController::class, 'bulkDelete'])->name('images.bulkDelete');
+                Route::resource('/news', AdminNewsController::class);
+                Route::post('/news/preview', [AdminNewsController::class, 'preview'])->name('news.preview');
+
+                Route::get('/forum', [ForumDashboardController::class, 'index'])->name('admin.forum.dashboard');
+                Route::resource('/forum/forum-categories', ForumCategoryController::class);
+                Route::get('/forum/forum-tags', [ThreadTagController::class, 'index'])->name('forum-tags.index');
+                Route::get('/forum/forum-tags/create', [ThreadTagController::class, 'create'])->name('forum-tags.create');
+                Route::post('/forum/forum-tags', [ThreadTagController::class, 'store'])->name('forum-tags.store');
+                Route::get('/forum/forum-tags/{id}/edit', [ThreadTagController::class, 'edit'])->name('forum-tags.edit');
+                Route::put('/forum/forum-tags/{id}', [ThreadTagController::class, 'update'])->name('forum-tags.update');
+                Route::delete('/forum/forum-tags/{id}', [ThreadTagController::class, 'destroy'])->name('forum-tags.destroy');
+            });
+        });
     });
 });

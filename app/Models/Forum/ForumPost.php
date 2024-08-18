@@ -28,7 +28,7 @@ class ForumPost extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    
     public function editHistory()
     {
         return $this->hasMany(PostEditHistory::class, 'post_id');

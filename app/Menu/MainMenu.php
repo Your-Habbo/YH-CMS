@@ -49,7 +49,7 @@ class MainMenu
     private static function generateLink($item, $isMobile)
     {
         $class = $isMobile
-            ? 'nav-text block hover:text-gray-300 drop-shadow-2xl uppercase py-2'
+            ? 'nav-text block hover:text-gray-300 drop-shadow-2xl uppercase py-12'
             : 'nav-text hover:text-gray-300 drop-shadow-2xl uppercase';
 
         return Link::to($item['url'], $item['title'])->addClass($class);

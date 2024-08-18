@@ -1,6 +1,4 @@
-@extends('layouts.app')
 
-@section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-3xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">Create New Thread</h1>
@@ -68,7 +66,7 @@
         </form>
     </div>
 </div>
-@endsection
+
 
 @push('scripts')
 <script>

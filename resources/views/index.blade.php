@@ -19,7 +19,7 @@
 
             <div class="card overflow-hidden">
     <div class="card-header pastel-mint px-6 py-4">
-        <h2 class="font-bold text-white">Featured News</h2>
+        <h2> class="font-bold text-white">Featured News</h2>
     </div>
     <div class="card-content p-4">
         <div x-data="{

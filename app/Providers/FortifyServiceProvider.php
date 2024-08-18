@@ -9,7 +9,6 @@ use App\Actions\Fortify\UpdateUserProfileInformation;
 use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
-use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,6 +16,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Features;
+use App\Actions\CheckTrustedDevice;
+use App\Actions\RedirectIfTwoFactorAuthenticatable;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -36,6 +37,10 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         Fortify::authenticateUsing(function (Request $request) {
+            Log::info('Fortify authenticateUsing called', [
+                'two_factor_confirmed' => $request->session()->get('auth.two_factor_confirmed', false)
+            ]);
+
             // Validate the login request
             $validator = Validator::make($request->all(), [
                 'login' => 'required|string',
@@ -62,7 +67,10 @@ class FortifyServiceProvider extends ServiceProvider
 
             // Check the password
             if ($user && Hash::check($request->password, $user->password)) {
-                Log::info('Authentication successful');
+                Log::info('Authentication successful', [
+                    'user_id' => $user->id,
+                    'two_factor_confirmed' => $request->session()->get('auth.two_factor_confirmed', false)
+                ]);
                 return $user;
             }
 
@@ -76,13 +84,16 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::authenticateThrough(function (Request $request) {
-            Log::info('Authenticating through pipeline');
-            return array_filter([
+            Log::info('Fortify authenticateThrough called');
+            $pipeline = array_filter([
                 config('fortify.limiters.login') ? null : EnsureLoginIsNotThrottled::class,
+                Features::enabled(Features::twoFactorAuthentication()) ? CheckTrustedDevice::class : null,
                 Features::enabled(Features::twoFactorAuthentication()) ? RedirectIfTwoFactorAuthenticatable::class : null,
                 AttemptToAuthenticate::class,
                 PrepareAuthenticatedSession::class,
             ]);
+            Log::info('Authentication pipeline', ['pipeline' => $pipeline]);
+            return $pipeline;
         });
 
         Fortify::loginView(function () {
@@ -91,6 +102,10 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::registerView(function () {
             return view('auth.register');
+        });
+
+        Fortify::twoFactorChallengeView(function () {
+            return view('auth.two-factor-challenge');
         });
 
         RateLimiter::for('login', function (Request $request) {
