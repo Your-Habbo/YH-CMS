@@ -1,76 +1,130 @@
 
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6">Create New Thread</h1>
 
-        <form action="{{ route('forum.store') }}" method="POST" class="space-y-6">
-            @csrf
+    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+            <div class="p-6 sm:p-8">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Create New Thread</h1>
 
-            <!-- Title -->
-            <div>
-                <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                <input type="text" name="title" id="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-            </div>
+                <form action="{{ route('forum.store') }}" method="POST" class="space-y-6" id="create-thread-form">
+                    @csrf
 
-            <!-- Category -->
-            <div>
-                <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
-                <select name="category_id" id="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                    <option value="">Select a category</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Tags -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-                <div class="grid grid-cols-3 gap-4">
-                    @foreach($tags as $tag)
-                        <div class="flex items-center">
-                            <input type="checkbox" name="tags[]" id="tag_{{ $tag->id }}" value="{{ $tag->id }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <label for="tag_{{ $tag->id }}" class="ml-2 text-sm text-gray-600">{{ $tag->name }}</label>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Content -->
-            <div>
-                <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
-                <textarea name="content" id="content" rows="6" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required></textarea>
-            </div>
-
-            <!-- Options -->
-            <div class="space-y-4">
-                @if(auth()->user()->can('create_sticky_threads'))
-                    <div class="flex items-center">
-                        <input type="checkbox" name="is_sticky" id="is_sticky" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <label for="is_sticky" class="ml-2 text-sm text-gray-600">Make this thread sticky</label>
+                    <!-- Title -->
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <input type="text" name="title" id="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                        <p id="title-counter" class="mt-2 text-sm text-gray-500"></p>
                     </div>
-                @endif
 
-                <div class="flex items-center">
-                    <input type="checkbox" name="requires_solution" id="requires_solution" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    <label for="requires_solution" class="ml-2 text-sm text-gray-600">This thread requires a solution</label>
-                </div>
-            </div>
+                    <!-- Category -->
+                    <div>
+                        <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select name="category_id" id="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            <option value="">Select a category</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-            <!-- Submit Button -->
-            <div>
-                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Create Thread
-                </button>
+                    <!-- Tags -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            @foreach($tags as $tag)
+                                <div class="flex items-center tag-checkbox">
+                                    <input type="checkbox" name="tags[]" id="tag_{{ $tag->id }}" value="{{ $tag->id }}" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <label for="tag_{{ $tag->id }}" class="ml-2 text-sm text-gray-600">{{ $tag->name }}</label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div>
+                        <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
+                        <div class="mt-1">
+                            <textarea id="content" name="content" rows="6" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" required></textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Write your thread content here. You can use Markdown for formatting.</p>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="space-y-4">
+                        @can('create_sticky_threads')
+                            <div class="flex items-center">
+                                <input type="checkbox" name="is_sticky" id="is_sticky" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="is_sticky" class="ml-2 text-sm text-gray-600">Make this thread sticky</label>
+                            </div>
+                        @endcan
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="requires_solution" id="requires_solution" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <label for="requires_solution" class="ml-2 text-sm text-gray-600">This thread requires a solution</label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-5">
+                        <div class="flex justify-end">
+                            <a href="{{ route('forum.index') }}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Cancel
+                            </a>
+                            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Create Thread
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
-</div>
 
 
-@push('scripts')
+
+
+
 <script>
-    // You can add any JavaScript for dynamic behavior here
-    // For example, you might want to add a rich text editor for the content field
+    document.addEventListener('DOMContentLoaded', function() {
+        const easyMDE = new EasyMDE({element: document.getElementById('content')});
+
+        // Preview character count
+        const titleInput = document.getElementById('title');
+        const titleCounter = document.getElementById('title-counter');
+
+        titleInput.addEventListener('input', function() {
+            const remaining = 100 - this.value.length;
+            titleCounter.textContent = `${remaining} characters remaining`;
+        });
+
+        // Enhance tag selection
+        const tagCheckboxes = document.querySelectorAll('.tag-checkbox input[type="checkbox"]');
+        tagCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.closest('.tag-checkbox').classList.toggle('bg-indigo-100', this.checked);
+            });
+        });
+
+        // PJAX form submission
+        const form = document.getElementById('create-thread-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-PJAX': 'true',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => response.text())
+              .then(html => {
+                  // Update the page content
+                  document.querySelector('#pjax-container').innerHTML = html;
+                  // You might need to reinitialize some JavaScript here
+              }).catch(error => {
+                  console.error('Error:', error);
+              });
+        });
+    });
 </script>
-@endpush

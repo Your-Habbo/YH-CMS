@@ -8,15 +8,24 @@ use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 use App\Http\Controllers\Auth\TwoFactorAuthenticatedSessionController as CustomTwoFactorAuthenticatedSessionController;
 
 use App\Http\Controllers\{
-    ForumController, 
     NotificationController, 
     ProfileController,
-    PostController,
     EventController,
     AvatarController,
     NewsController,
     HomeController,
     PageController,
+};
+
+use App\Http\Controllers\Forum\{
+    ThreadController,
+    CategoryController as ForumCategoryController,
+    TagController as ForumTagController,
+    PostController as ForumPostController,
+    SearchController,
+    SolutionController,
+    HelpfulController,
+    LikeController
 };
 
 use App\Http\Controllers\Settings\{
@@ -30,8 +39,8 @@ use App\Http\Controllers\Admin\{
     UserController,
     ImageController,
     ForumDashboardController,
-    ForumCategoryController,
-    ThreadTagController,
+    ForumCategoryController as AdminForumCategoryController,
+    ThreadTagController as AdminThreadTagController,
     NewsController as AdminNewsController,
 };
 
@@ -52,10 +61,12 @@ Route::middleware('web')->group(function () {
     Route::get('events/search', [EventController::class, 'search'])->name('events.search');
 
     // Forum
-    Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
-    Route::get('/forum/category/{slug}', [ForumController::class, 'category'])->name('forum.category');
-    Route::get('/forum/{slug}', [ForumController::class, 'show'])->name('forum.show');
-    Route::get('/forum/tag/{slug}', [ForumController::class, 'tag'])->name('forum.tag');
+    Route::get('/forum', [ThreadController::class, 'index'])->name('forum.index');
+    Route::get('/forum/category/{slug}', [ForumCategoryController::class, 'show'])->name('forum.category');
+    Route::get('/forum/{slug}', [ThreadController::class, 'show'])->name('forum.show');
+    Route::get('/forum/tag/{slug}', [ForumTagController::class, 'show'])->name('forum.tag');
+    Route::get('/forum/search', [SearchController::class, 'search'])->name('forum.search');
+
     Route::get('/habbo-imaging/avatarimage', function () {
         $params = request()->all();
         $habboUrl = "https://www.habbo.com.tr/habbo-imaging/avatarimage?" . http_build_query($params);
@@ -76,11 +87,11 @@ Route::middleware('web')->group(function () {
             Route::get('/', [TwoFactorController::class, 'index'])->name('index');
             Route::get('/setup', [TwoFactorController::class, 'enableToken'])->name('setup');
             Route::post('/confirm', [TwoFactorController::class, 'confirmToken'])->name('confirm-token');
-            Route::get('/recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes-alt'); // Ensure this name is unique
+            Route::get('/recovery-codes', [TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes-alt');
             Route::post('/disable', [TwoFactorController::class, 'disable'])->name('disable-alt');
         });
     });
-    
+
     Route::middleware(['2fa'])->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard');
@@ -88,7 +99,7 @@ Route::middleware('web')->group(function () {
 
         Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.challenge');
         Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
- 
+
         Route::middleware(['auth'])->group(function () {
 
             Route::get('user/avatar', [AvatarController::class, 'show'])->name('user.avatar');
@@ -96,30 +107,29 @@ Route::middleware('web')->group(function () {
 
             Route::prefix('forum')->name('forum.')->group(function () {
                 // Forum authenticated routes
-                Route::post('/', [ForumController::class, 'store'])->name('store');
-                Route::post('/{thread}/posts', [PostController::class, 'store'])->name('posts.store');
-                Route::get('/search', [ForumController::class, 'search'])->name('search');
-                
-                Route::post('/{thread}/mark-solution/{post}', [ForumController::class, 'markAsSolution'])->name('markSolution');
-                Route::post('/{thread}/mark-helpful', [ForumController::class, 'markAsHelpful'])->name('markHelpful');
+                Route::post('/', [ThreadController::class, 'store'])->name('store');
+                Route::post('/{thread}/posts', [ForumPostController::class, 'reply'])->name('posts.store');
 
-                Route::get('/thread/create/', [ForumController::class, 'create'])->name('create');
-                Route::get('/{thread}/edit', [ForumController::class, 'edit'])->name('threads.edit');
-                Route::put('/{thread}', [ForumController::class, 'update'])->name('threads.update');
+                Route::post('/{thread}/mark-solution/{post}', [SolutionController::class, 'markAsSolution'])->name('markSolution');
+                Route::post('/{thread}/mark-helpful', [HelpfulController::class, 'markAsHelpful'])->name('markHelpful');
 
-                Route::post('/posts/{post}/edit', [ForumController::class, 'editPost'])->name('post.edit');
-                Route::get('/posts/{post}/history', [ForumController::class, 'getPostEditHistory'])->name('post.history');
+                Route::get('/thread/create', [ThreadController::class, 'create'])->name('create');
+                Route::get('/{thread}/edit', [ThreadController::class, 'edit'])->name('threads.edit');
+                Route::put('/{thread}', [ThreadController::class, 'update'])->name('threads.update');
 
-                Route::post('/threads/{thread}/edit', [ForumController::class, 'editThread'])->name('thread.edit');
-                Route::get('/threads/{thread}/history', [ForumController::class, 'getThreadEditHistory'])->name('thread.history');
+                Route::post('/posts/{post}/edit', [ForumPostController::class, 'editPost'])->name('post.edit');
+                Route::get('/posts/{post}/history', [ForumPostController::class, 'getPostEditHistory'])->name('post.history');
+
+                Route::post('/threads/{thread}/edit', [ThreadController::class, 'editThread'])->name('thread.edit');
+                Route::get('/threads/{thread}/history', [ThreadController::class, 'getThreadEditHistory'])->name('thread.history');
                 
                 // Post like/unlike routes
-                Route::post('/posts/{post}/like', [ForumController::class, 'likePost'])->name('post.like');
-                Route::post('/posts/{post}/unlike', [ForumController::class, 'unlikePost'])->name('post.unlike');
+                Route::post('/posts/{post}/like', [LikeController::class, 'likePost'])->name('post.like');
+                Route::post('/posts/{post}/unlike', [LikeController::class, 'unlikePost'])->name('post.unlike');
 
                 // Thread like/unlike routes
-                Route::post('/threads/{thread}/like', [ForumController::class, 'likeThread'])->name('thread.like');
-                Route::post('/threads/{thread}/unlike', [ForumController::class, 'unlikeThread'])->name('thread.unlike');
+                Route::post('/threads/{thread}/like', [LikeController::class, 'likeThread'])->name('thread.like');
+                Route::post('/threads/{thread}/unlike', [LikeController::class, 'unlikeThread'])->name('thread.unlike');
             });
 
             // Notifications
@@ -151,9 +161,9 @@ Route::middleware('web')->group(function () {
                 Route::get('/', [SettingsSecurityController::class, 'index'])->name('settings.security.index');
                 Route::post('/update-login-alerts', [SettingsSecurityController::class, 'updateLoginAlerts'])->name('security.updateLoginAlerts');
                 Route::delete('/sessions/{id}', [SettingsSecurityController::class, 'logoutSession'])->name('security.logoutSession');
-                Route::delete('/trusted-devices/{id}', [SettingsSecurityController::class, 'removeTrustedDevice'])->name('security.removeTrustedDevice-alt'); // Unique name
+                Route::delete('/trusted-devices/{id}', [SettingsSecurityController::class, 'removeTrustedDevice'])->name('security.removeTrustedDevice-alt');
                 Route::post('/toggle-2fa', [SettingsSecurityController::class, 'toggle2FA'])->name('security.toggle2FA');
-                Route::delete('/logout-session/{sessionId}', [SettingsSecurityController::class, 'logoutSession'])->name('security.logoutSession-alt'); // Unique name
+                Route::delete('/logout-session/{sessionId}', [SettingsSecurityController::class, 'logoutSession'])->name('security.logoutSession-alt');
                 Route::post('/logout-all-sessions', [SettingsSecurityController::class, 'logoutAllSessions'])->name('settings.logoutAllSessions');
                 Route::post('/two-factor/verify-password', [TwoFactorController::class, 'verifyPassword'])->name('two-factor.verify-password');
                 Route::post('/two-factor/reset-recovery-codes', [TwoFactorController::class, 'resetRecoveryCodes'])->name('two-factor.reset-recovery-codes');
@@ -183,13 +193,13 @@ Route::middleware('web')->group(function () {
                 Route::post('/news/preview', [AdminNewsController::class, 'preview'])->name('news.preview');
 
                 Route::get('/forum', [ForumDashboardController::class, 'index'])->name('admin.forum.dashboard');
-                Route::resource('/forum/forum-categories', ForumCategoryController::class);
-                Route::get('/forum/forum-tags', [ThreadTagController::class, 'index'])->name('forum-tags.index');
-                Route::get('/forum/forum-tags/create', [ThreadTagController::class, 'create'])->name('forum-tags.create');
-                Route::post('/forum/forum-tags', [ThreadTagController::class, 'store'])->name('forum-tags.store');
-                Route::get('/forum/forum-tags/{id}/edit', [ThreadTagController::class, 'edit'])->name('forum-tags.edit');
-                Route::put('/forum/forum-tags/{id}', [ThreadTagController::class, 'update'])->name('forum-tags.update');
-                Route::delete('/forum/forum-tags/{id}', [ThreadTagController::class, 'destroy'])->name('forum-tags.destroy');
+                Route::resource('/forum/forum-categories', AdminForumCategoryController::class);
+                Route::get('/forum/forum-tags', [AdminThreadTagController::class, 'index'])->name('forum-tags.index');
+                Route::get('/forum/forum-tags/create', [AdminThreadTagController::class, 'create'])->name('forum-tags.create');
+                Route::post('/forum/forum-tags', [AdminThreadTagController::class, 'store'])->name('forum-tags.store');
+                Route::get('/forum/forum-tags/{id}/edit', [AdminThreadTagController::class, 'edit'])->name('forum-tags.edit');
+                Route::put('/forum/forum-tags/{id}', [AdminThreadTagController::class, 'update'])->name('forum-tags.update');
+                Route::delete('/forum/forum-tags/{id}', [AdminThreadTagController::class, 'destroy'])->name('forum-tags.destroy');
             });
         });
     });

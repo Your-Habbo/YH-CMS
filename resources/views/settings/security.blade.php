@@ -17,9 +17,9 @@
                     <h2 class="py-2 text-lg font-semibold">Active Login Sessions</h2>
                     <div class="space-y-4">
                         @foreach ($sessions as $session)
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center bg-gray-100 p-3 sm:rounded-md"">
                                 <div>
-                                    <p class="text-gray-600">{{ $session->device }} on {{ $session->platform }}</p>
+                                    <p class="text-xs font-medium text-gray-900">{{ $session->device }} on {{ $session->platform }}</p>
                                     <p class="text-xs text-gray-500">IP: {{ $session->ip_address }} - Last active: {{ \Carbon\Carbon::parse($session->last_active_at)->diffForHumans() }}</p>
                                 </div>
                                 <form action="{{ route('security.logoutSession', $session->id) }}" method="POST">
@@ -47,7 +47,7 @@
                     </p>
                     <div class="mt-4 space-y-4">
                         @forelse($trustedDevices as $device)
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center bg-gray-100 p-3 sm:rounded-md">
                                 <div>
                                     <p class="text-xs font-medium text-gray-900">{{ $device->device_name }}</p>
                                     <p class="text-xs text-gray-500">IP: {{ $device->device_ip }}</p>
@@ -56,7 +56,7 @@
                                 <form action="{{ route('security.removeTrustedDevice-alt', $device) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-600 hover:text-red-900">Revoke</button>
+                                    <button type="submit" class="text-xs font-semibold text-red-600 hover:text-red-800 underline">Revoke</button>
                                 </form>
                             </div>
                         @empty
@@ -79,9 +79,9 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="mt-5 md:mt-0 md:col-span-2">
-                                <div class="shadow overflow-hidden sm:rounded-md">
-                                    <div class="px-4 py-5 bg-white sm:p-6">
+                            <div class="mt-5 md:mt-0 md:col-span-2 ">
+                                <div class="shadow bg-gray-100 overflow-hidden sm:rounded-md">
+                                    <div class="px-4 py-5 sm:p-6 ">
                                         @if(auth()->user()->two_factor_secret)
                                             <div class="mb-4">
                                                 <p class="text-xs text-gray-600">Two-Factor Authentication is currently <strong class="text-green-600">Enabled</strong>.</p>
