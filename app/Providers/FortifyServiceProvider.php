@@ -21,16 +21,20 @@ use App\Actions\RedirectIfTwoFactorAuthenticatable;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Http\Traits\PjaxTrait;
 
 class FortifyServiceProvider extends ServiceProvider
-{
+{   
+    use PjaxTrait;
+    
     public function register()
     {
         //
     }
 
     public function boot()
-    {
+    {   
+        
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
@@ -97,15 +101,15 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::loginView(function () {
-            return view('auth.login');
+            return $this->view('auth.login');
         });
 
         Fortify::registerView(function () {
-            return view('auth.register');
+            return $this->view('auth.register');
         });
 
         Fortify::twoFactorChallengeView(function () {
-            return view('auth.two-factor-challenge');
+            return $this->view('auth.two-factor-challenge');
         });
 
         RateLimiter::for('login', function (Request $request) {

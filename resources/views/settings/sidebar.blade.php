@@ -1,3 +1,6 @@
+@pjax('layouts.app')
+
+
 <div class="card p-6">
   <h2 class="text-xl font-semibold mb-6">Settings</h2>
   <nav>

@@ -2,4 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
+.loading-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Adjust spacing between the GIF and text */
+}
 
+.loading-image {
+  width: 50px; /* Adjust size as needed */
+  height: 50px;
+}
+
+.loading-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000; /* Adjust color as needed */
+}
+
+@keyframes loadingAnimation {
+  0% {
+      content: 'Loading';
+  }
+  25% {
+      content: 'Loading.';
+  }
+  50% {
+      content: 'Loading..';
+  }
+  75% {
+      content: 'Loading...';
+  }
+  100% {
+      content: 'Loading';
+  }
+}
+
+.loading-text::after {
+  content: 'Loading';
+  animation: loadingAnimation 1.5s infinite;
+}
+
+
+.custom-space-x-14 {
+    @apply space-x-20;
+  }
+  
+  .custom-space {
+    margin-left: 2rem; /* Apply custom spacing directly */
+  }
+  
+  .custom-padding {
+    padding: 2rem; /* Custom padding class */
+  }
+  
+  .custom-margin {
+    margin: 2rem; /* Custom margin class */
+  }
+
+  .nav-logo {
+    display: none;
+  }
+
+  /* Show the div when screen width is larger than 1300px */
+  @media screen and (min-width: 1301px) {
+    .nav-logo  {
+      display: block;
+      
+    }
+  }
+  @media screen and (max-width: 1301px) {
+    .custom-space-x-14 {
+      @apply space-x-8;
+    }
+    
+    
+  }
+  .nav-icon, .dropdown-text {
+    font-family: 'Volter-Bold', sans-serif;
+    color: white;
+    text-shadow: 
+        -2px -2px 0 #2e2e2e,
+        2px -2px 0 #2e2e2e,
+        -2px 2px 0 #2e2e2e,
+        2px 2px 0 #2e2e2e,
+        -1px -1px 0 #2e2e2e,
+        1px -1px 0 #2e2e2e,
+        -1px 1px 0 #2e2e2e,
+        1px 1px 0 #2e2e2e,
+        2px 2px 3px rgba(49, 49, 49, 0.3);
+}

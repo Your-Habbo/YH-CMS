@@ -2,19 +2,23 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use App\Http\Controllers\TwoFactorController;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
-use App\Http\Controllers\Auth\TwoFactorAuthenticatedSessionController as CustomTwoFactorAuthenticatedSessionController;
+
 
 use App\Http\Controllers\{
     NotificationController, 
     ProfileController,
     EventController,
-    AvatarController,
     NewsController,
     HomeController,
     PageController,
+    TwoFactorController,
+};
+
+use App\Http\Controllers\Auth\{
+    TwoFactorAuthenticatedSessionController as CustomTwoFactorAuthenticatedSessionController,
+
 };
 
 use App\Http\Controllers\Forum\{
@@ -42,15 +46,35 @@ use App\Http\Controllers\Admin\{
     ForumCategoryController as AdminForumCategoryController,
     ThreadTagController as AdminThreadTagController,
     NewsController as AdminNewsController,
+    RoleController as AdminRoleController,
+    PageController as AdminPageController,
 };
 
+use App\Http\Controllers\Helper\{
+    SongSearchController,
+    AvatarController,
+
+};
 // Public routes
 Route::middleware('web')->group(function () {
+    Route::get('/habbo-imaging/avatarimage', function () {
+        $params = request()->all();
+        $habboUrl = "https://www.habbo.com.tr/habbo-imaging/avatarimage?" . http_build_query($params);
+        $response = Http::get($habboUrl);
+        return response($response->body(), $response->status())
+            ->header('Content-Type', $response->header('Content-Type'));
+    });
+
+    Route::get('/search-song', [SongSearchController::class, 'searchSong']);
+
+    Route::get('/pages/{slug}', [AdminPageController::class, 'show'])->name('pages.show');
+
     Route::get('/', [HomeController::class, 'index'])->name('index');
     Route::get('/about', [PageController::class, 'about'])->name('page.about');
     Route::get('/terms', [PageController::class, 'terms'])->name('page.terms');
     Route::get('/disclaimer', [PageController::class, 'disclaimer'])->name('page.disclaimer');
     Route::get('/privacy', [PageController::class, 'privacy'])->name('page.privacy');
+    Route::get('pages/{slug}', [PageController::class, 'show'])->name('pages.show');
     
     // News
     Route::get('news', [NewsController::class, 'index'])->name('news.index');
@@ -67,19 +91,17 @@ Route::middleware('web')->group(function () {
     Route::get('/forum/tag/{slug}', [ForumTagController::class, 'show'])->name('forum.tag');
     Route::get('/forum/search', [SearchController::class, 'search'])->name('forum.search');
 
-    Route::get('/habbo-imaging/avatarimage', function () {
-        $params = request()->all();
-        $habboUrl = "https://www.habbo.com.tr/habbo-imaging/avatarimage?" . http_build_query($params);
-        $response = Http::get($habboUrl);
-        return response($response->body(), $response->status())
-            ->header('Content-Type', $response->header('Content-Type'));
-    });
 
+
+    //Guest Routes
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
         Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
         Route::get('/two-factor-login', [TwoFactorAuthenticatedSessionController::class, 'create'])->name('two-factor.login');
         Route::post('/two-factor-login', [CustomTwoFactorAuthenticatedSessionController::class, 'store'])->name('two-factor.login.store');
+
+
+    
     });
 
     Route::middleware(['auth'])->group(function () {
@@ -109,28 +131,40 @@ Route::middleware('web')->group(function () {
                 // Forum authenticated routes
                 Route::post('/', [ThreadController::class, 'store'])->name('store');
                 Route::post('/{thread}/posts', [ForumPostController::class, 'reply'])->name('posts.store');
-
+            
                 Route::post('/{thread}/mark-solution/{post}', [SolutionController::class, 'markAsSolution'])->name('markSolution');
                 Route::post('/{thread}/mark-helpful', [HelpfulController::class, 'markAsHelpful'])->name('markHelpful');
+            
+                // Thread creation and editing
+                Route::get('/create', [ThreadController::class, 'create'])->name('create')->middleware('throttle:5,1');
+                Route::get('/{thread}/edit', [ThreadController::class, 'edit'])->name('threads.edit');  
+                Route::put('/{thread}', [ThreadController::class, 'update'])->name('threads.update')->middleware('throttle:5,1');
+                Route::post('/threads/{thread}/solve/{post}', [ThreadController::class, 'markAsSolved'])->name('threads.solve');
 
-                Route::get('/thread/create', [ThreadController::class, 'create'])->name('create');
-                Route::get('/{thread}/edit', [ThreadController::class, 'edit'])->name('threads.edit');
-                Route::put('/{thread}', [ThreadController::class, 'update'])->name('threads.update');
-
-                Route::post('/posts/{post}/edit', [ForumPostController::class, 'editPost'])->name('post.edit');
+                // Post editing and history 
+                Route::post('/posts/{post}/edit', [ForumPostController::class, 'editPost'])->name('posts.edit');
                 Route::get('/posts/{post}/history', [ForumPostController::class, 'getPostEditHistory'])->name('post.history');
-
-                Route::post('/threads/{thread}/edit', [ThreadController::class, 'editThread'])->name('thread.edit');
-                Route::get('/threads/{thread}/history', [ThreadController::class, 'getThreadEditHistory'])->name('thread.history');
-                
+            
+                // Thread history
+                Route::get('/{thread}/history', [ThreadController::class, 'getThreadEditHistory'])->name('thread.history');
+            
                 // Post like/unlike routes
-                Route::post('/posts/{post}/like', [LikeController::class, 'likePost'])->name('post.like');
-                Route::post('/posts/{post}/unlike', [LikeController::class, 'unlikePost'])->name('post.unlike');
+                Route::post('/posts/{post}/like', [LikeController::class, 'likePost'])->name('post.like')->middleware('throttle:150,1');
+                Route::post('/posts/{post}/unlike', [LikeController::class, 'unlikePost'])->name('post.unlike')->middleware('throttle:150,1');
 
                 // Thread like/unlike routes
-                Route::post('/threads/{thread}/like', [LikeController::class, 'likeThread'])->name('thread.like');
-                Route::post('/threads/{thread}/unlike', [LikeController::class, 'unlikeThread'])->name('thread.unlike');
+                Route::post('/{thread}/like', [LikeController::class, 'likeThread'])->name('thread.like')->middleware('throttle:150,1');
+                Route::post('/{thread}/unlike', [LikeController::class, 'unlikeThread'])->name('thread.unlike')->middleware('throttle:150,1');
+
+                 // Soft delete routes
+                Route::delete('/threads/{thread}', [ThreadController::class, 'delete'])->name('threads.destroy');
+                Route::delete('/posts/{post}', [ForumPostController::class, 'destroy'])->name('posts.destroy');
+
+                // Mark as solution route
+                Route::post('/threads/{thread}/posts/{post}/mark-solution', [ForumPostController::class, 'markAsSolution'])->name('posts.markSolution');
+                Route::post('/threads/{thread}/toggle-sticky', [ThreadController::class, 'toggleSticky'])->name('threads.toggleSticky');
             });
+            
 
             // Notifications
             Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -200,6 +234,27 @@ Route::middleware('web')->group(function () {
                 Route::get('/forum/forum-tags/{id}/edit', [AdminThreadTagController::class, 'edit'])->name('forum-tags.edit');
                 Route::put('/forum/forum-tags/{id}', [AdminThreadTagController::class, 'update'])->name('forum-tags.update');
                 Route::delete('/forum/forum-tags/{id}', [AdminThreadTagController::class, 'destroy'])->name('forum-tags.destroy');
+
+
+
+                Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
+                Route::get('/roles/create', [AdminRoleController::class, 'create'])->name('roles.create');
+                Route::post('/roles', [AdminRoleController::class, 'store'])->name('roles.store');
+                Route::get('/roles/{role}/edit', [AdminRoleController::class, 'edit'])->name('roles.edit');
+                Route::put('/roles/{role}', [AdminRoleController::class, 'update'])->name('roles.update');
+                Route::delete('/roles/{role}', [AdminRoleController::class, 'destroy'])->name('roles.destroy');
+
+
+
+                
+                Route::get('pages', [AdminPageController::class, 'index'])->name('pages.index');
+                Route::get('pages/create', [AdminPageController::class, 'create'])->name('pages.create');
+                Route::post('pages', [AdminPageController::class, 'store'])->name('pages.store');
+                Route::get('pages/{page}', [AdminPageController::class, 'show'])->name('pages.show');
+                Route::get('pages/{page}/edit', [AdminPageController::class, 'edit'])->name('pages.edit');
+                Route::put('pages/{page}', [AdminPageController::class, 'update'])->name('pages.update');
+                Route::delete('pages/{page}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
+                
             });
         });
     });

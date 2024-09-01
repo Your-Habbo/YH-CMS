@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@pjax('layouts.app')
 
 @section('content')
 <link href="{{ asset('assets/avatar/css/avatargenerate.css') }}" rel="stylesheet" />

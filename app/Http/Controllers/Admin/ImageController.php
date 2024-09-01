@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Traits\PjaxTrait;
 
 class ImageController extends Controller
 {
+    use PjaxTrait;
+
     public function index(Request $request)
 {
     $query = Image::query();        
@@ -27,7 +30,7 @@ class ImageController extends Controller
     // Paginate the images
     $images = $query->paginate(12); // Adjust the number as needed
 
-    return view('admin.images.index', compact('images', 'breadcrumbs'));
+    return $this->view('admin.images.index', compact('images', 'breadcrumbs'));
 }
 
     public function store(Request $request)

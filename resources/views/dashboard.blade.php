@@ -1,3 +1,5 @@
+@pjax('layouts.app')
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +33,5 @@
             </div>
         </div>
     </div>
-
-    <script src="{{ mix('js/app.js') }}"></script>
 </body>
 </html>

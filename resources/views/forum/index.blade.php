@@ -1,16 +1,17 @@
+@pjax('layouts.app')
 
-
-@section('content')
 @php
-function getAvatarUrl($avatarConfig) {
-    $baseUrl = url('/habbo-imaging/avatarimage');
-    $params = [
-        'figure' => $avatarConfig,
-        'size' => 's',
-        'head_direction' => 2,
-        'direction' => 2,
-    ];
-    return $baseUrl . '?' . http_build_query($params);
+if (!function_exists('getAvatarUrl')) {
+    function getAvatarUrl($avatarConfig) {
+        $baseUrl = url('/habbo-imaging/avatarimage');
+        $params = [
+            'figure' => $avatarConfig,
+            'size' => 'm',
+            'head_direction' => 2,
+            'headonly' => 1,
+        ];
+        return $baseUrl . '?' . http_build_query($params);
+    }
 }
 @endphp
 
@@ -90,9 +91,13 @@ function getAvatarUrl($avatarConfig) {
                                             @if($thread->is_sticky)
                                                 <span class="bg-yellow-500 text-white text-xxs px-2 py-1 rounded mr-2 mb-1">Sticky</span>
                                             @endif
+                                            @if($thread->deleted_at)
+                                            <span class="pr-5 text-red-600 text-blond"> (Deleted)</span>
+                                            @endif
                                             <h3 class="text-sm sm:text-base font-bold hover:text-blue-500 transition duration-300">
                                                 <a href="{{ route('forum.show', $thread->slug) }}">{{ $thread->title }}</a>
                                             </h3>
+
                                         </div>
                                         <p class="text-xxs sm:text-xs text-gray-600">Posted by <span class="font-semibold">{{ $thread->user->name }}</span> in <a href="{{ route('forum.category', $thread->category->slug) }}" class="font-semibold text-blue-500 hover:underline">{{ $thread->category->name }}</a></p>
                                         <p class="text-xxs sm:text-xs text-gray-600 mt-2">{{ Str::limit($thread->content, 80) }}</p>

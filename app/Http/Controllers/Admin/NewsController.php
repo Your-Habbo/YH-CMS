@@ -8,9 +8,12 @@ use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Http\Traits\PjaxTrait;
 
 class NewsController extends Controller
 {
+    use PjaxTrait;
+    
     public function index()
     {
         $news = News::all();   
@@ -20,7 +23,7 @@ class NewsController extends Controller
             ['label' => 'News Article'],
         ];
 
-        return view('admin.news.index', compact('news',  'breadcrumbs'));
+        return $this->view('admin.news.index', compact('news',  'breadcrumbs'));
     }
 
     public function create()
@@ -33,7 +36,7 @@ class NewsController extends Controller
             ['label' => 'Create New Article'],
         ];
     
-        return view('admin.news.create', compact('images', 'breadcrumbs'));
+        return $this->view('admin.news.create', compact('images', 'breadcrumbs'));
     }
     
 
@@ -70,7 +73,7 @@ class NewsController extends Controller
             ['label' => 'Edit Article', 'url' => route('admin.news.edit', 'breadcrumbs', $news->id)],
         ];
 
-        return view('admin.news.edit', compact('news', 'images', 'breadcrumbs'));
+        return $this->view('admin.news.edit', compact('news', 'images', 'breadcrumbs'));
     }
 
     public function update(Request $request, News $news)
@@ -110,7 +113,7 @@ class NewsController extends Controller
         $news->published_at = $request->published_at ? Carbon::parse($request->published_at) : now();
         $news->is_featured = $request->has('is_featured');
 
-        return view('admin.news.preview', compact('news'));
+        return $this->view('admin.news.preview', compact('news'));
     }
 
 }

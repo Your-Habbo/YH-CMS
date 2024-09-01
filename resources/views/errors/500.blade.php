@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@pjax('layouts.error')
 
 @section('title', '500 - Server Error')
 
-@section('content')
+
 <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="max-w-xl w-full space-y-8 p-10 bg-white shadow-xl rounded-xl">
         <div class="text-center">
@@ -22,4 +22,3 @@
         </div>
     </div>
 </div>
-@endsection

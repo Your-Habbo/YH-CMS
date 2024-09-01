@@ -1,16 +1,28 @@
 <!-- layouts/partials/nav.blade.php -->
-<div class="container mx-auto px-4">
+<div class="container mx-auto px-4" x-data="{ open: false }">
     <div class="flex justify-between items-center h-16">
         <!-- Logo or Brand -->
-        <a href="/" class="nav-text text-xl font-bold">YourHabbo</a>
+        <a href="/" class="nav-text text-xl font-bold nav-logo">YourHabbo</a>
 
-        <!-- Center: Navigation links -->
-        <div class="flex justify-center items-center h-20 relative">
+        <!-- Center: Navigation links (Desktop) -->
+        <div class="hidden lg:flex justify-center items-center h-20 relative">
             {!! App\Menu\MainMenu::build() !!}
         </div>
 
-        <!-- Right side: User Options -->
-        <div class="flex items-center space-x-4 text-sm">
+        <!-- Mobile Menu Button -->
+        <div class="lg:hidden flex items-center nav-text">
+            <button @click="open = !open" class="nav-text hover:text-gray-300 focus:outline-none focus:text-gray-300" aria-label="Toggle menu">
+                <svg x-show="!open" class="w-6 h-6" fill="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+                <svg x-show="open" class="w-6 h-6" fill="" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Right side: User Options (Desktop) -->
+        <div class="hidden lg:flex items-center space-x-4 text-sm">
             @auth
                 <div class="flex items-center space-x-4">
                     <!-- Habbo Head -->
@@ -60,26 +72,58 @@
 
                     <!-- User Dropdown -->
                     <div x-data="{ open: false }" class="relative">
+                        <!-- Dropdown Toggle Button -->
                         <button @click="open = !open" class="flex items-center text-white hover:text-gray-300">
                             <span>{{ auth()->user()->name }}</span>
-                            <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 ml-1 transition-transform duration-200 transform">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" 
+                                 class="inline w-4 h-4 ml-1 transition-transform duration-200 transform">
+                                <path fill-rule="evenodd" 
+                                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+                                      clip-rule="evenodd">
+                                </path>
                             </svg>
                         </button>
-                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-50">
-                            <a href="{{ route('profile.show', auth()->user()) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                            <a href="{{ route('settings.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                            <form method="POST" action="{{ route('logout') }}">
+                        
+                        <!-- Dropdown Menu -->
+                        <div x-show="open" @click.away="open = false" 
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-50">
+                            <!-- Profile Link -->
+                            <a href="{{ route('profile.show', auth()->user()) }}" 
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Profile
+                            </a>
+                            
+                            <!-- Settings Link -->
+                            <a href="{{ route('settings.index') }}" 
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Settings
+                            </a>
+                            
+                            <!-- Logout Link -->
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Logout
+                            </a>
+
+                            <!-- Logout Form (Hidden) -->
+                            <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
                                 @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
                             </form>
                         </div>
                     </div>
                 </div>
             @else
+                <!-- Login and Register Links -->
                 <a href="{{ route('login') }}" class="nav-text hover:text-gray-300 drop-shadow-2xl uppercase" data-no-pjax="true">Login</a>
                 <a href="{{ route('register') }}" class="nav-text hover:text-gray-300 drop-shadow-2xl uppercase" data-no-pjax="true">Register</a>
             @endauth
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div x-show="open" @click.away="open = false" class="lg:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                {!! App\Menu\MainMenu::buildMobile() !!}
+            </div>
         </div>
     </div>
 </div>

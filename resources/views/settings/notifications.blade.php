@@ -1,3 +1,4 @@
+@pjax('layouts.app')
 
 <div class="mx-4 max-w-screen-xl sm:mx-8 xl:mx-auto">
   <h1 class="border-b py-6 text-4xl font-semibold">Settings</h1>

@@ -2,42 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Traits\PjaxTrait;
+use App\Models\Page;
 use Illuminate\Http\Request;
+use App\Http\Traits\PjaxTrait;
 
 class PageController extends Controller
 {
     use PjaxTrait;
 
     /**
-     * Display the about page.
+     * Display the specified page.
      */
-    public function about()
+    public function show($slug)
     {
-        return $this->view('pages.about');
-    }
+        $page = Page::where('slug', $slug)->firstOrFail();
 
-    /**
-     * Display the disclaimer page.
-     */
-    public function disclaimer()
-    {
-        return $this->view('pages.disclaimer');
-    }
+        // Use the layout defined in the page record
+        $layout = $page->layout;
 
-    /**
-     * Display the terms page.
-     */
-    public function terms()
-    {
-        return $this->view('pages.terms');
-    }
-
-    /**
-     * Display the privacy page.
-     */
-    public function privacy()
-    {
-        return $this->view('pages.privacy');
+        // Pass the layout to the view
+        return $this->view('pages.show', compact('page', 'layout'), 200, $layout);
     }
 }

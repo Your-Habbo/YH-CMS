@@ -10,11 +10,13 @@ use Spatie\Permission\Models\Role;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\Facades\CauserResolver;
-
+use App\Http\Traits\PjaxTrait;
 use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    use PjaxTrait;
+
     /**
      * Display a listing of the resource.
      */
@@ -22,7 +24,7 @@ class UserController extends Controller
     {
         $users = User::withTrashed()->paginate(10); // Retrieve all users including soft-deleted ones
 
-        return view('admin.users.index', compact('users'));
+        return $this->view('admin.users.index', compact('users'));
     }
 
     /**
@@ -32,7 +34,7 @@ class UserController extends Controller
     {
         $roles = Role::all(); // Retrieve all available roles
 
-        return view('admin.users.create', compact('roles'));
+        return $this->view('admin.users.create', compact('roles'));
     }
 
     /**
@@ -66,7 +68,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('admin.users.show', compact('user'));
+        return $this->view('admin.users.show', compact('user'));
     }
 
     /**
@@ -87,7 +89,7 @@ class UserController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('admin.users.edit', compact('user', 'roles', 'userRoles', 'activityLogs'));
+        return $this->view('admin.users.edit', compact('user', 'roles', 'userRoles', 'activityLogs'));
     }
 
     /**

@@ -1,3 +1,6 @@
+@pjax('layouts.admin')
+
+
 <main class="container mx-auto py-10">
     <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
         <h1 class="text-3xl font-bold mb-6">{{ $news->title }}</h1>

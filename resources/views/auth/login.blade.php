@@ -1,8 +1,8 @@
-@extends('layouts.auth')
+@pjax('layouts.auth')
 
 @section('title', 'Sign In')
 
-@section('content')
+
 <!-- Login -->
 <div class="card relative flex w-96 flex-col space-y-5 bg-white px-5 py-10 sm:mx-auto" style="filter: drop-shadow(14px 10px 10px #4a4a4a);">
     <div class="mx-auto mb-2 space-y-3">
@@ -23,7 +23,7 @@
                     Enter Your Username or Email
                 </label>
                 @error('login')
-                    <span class="text-xs text-red-600">{{ $message }}</span>
+                    <span class="form-error text-xs text-red-600">{{ $message }}</span>
                 @enderror
             </div>
         </div>
@@ -39,7 +39,7 @@
                     Enter Your Password
                 </label>
                 @error('password')
-                    <span class="text-xs text-red-600">{{ $message }}</span>
+                    <span class="form-error text-xs text-red-600">{{ $message }}</span>
                 @enderror
             </div>
         </div>
@@ -81,6 +81,3 @@
         </p>
     </div>
 </div>
-<!-- /Login -->
-
-    @endsection

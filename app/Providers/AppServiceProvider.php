@@ -8,10 +8,12 @@ use App\Models\Forum\ForumPost;
 use App\Policies\ThreadPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
-{
+{   
+
+
     /**
      * Register any application services.
      */
@@ -24,7 +26,13 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {
+    {   
+        Blade::directive('pjax', function ($expression) {
+            return "<?php \$GLOBALS['__pjaxLayout'] = $expression; ?>
+                    <meta name=\"layout\" content=\"<?php echo $expression; ?>\">";
+        });
+        
+
         $this->registerPolicies();
 
         Gate::define('update-post', function (User $user, ForumPost $post) {

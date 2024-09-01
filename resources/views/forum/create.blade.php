@@ -1,4 +1,4 @@
-
+@pjax('layouts.app')
 
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
@@ -103,28 +103,4 @@
                 this.closest('.tag-checkbox').classList.toggle('bg-indigo-100', this.checked);
             });
         });
-
-        // PJAX form submission
-        const form = document.getElementById('create-thread-form');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(form);
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-PJAX': 'true',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(response => response.text())
-              .then(html => {
-                  // Update the page content
-                  document.querySelector('#pjax-container').innerHTML = html;
-                  // You might need to reinitialize some JavaScript here
-              }).catch(error => {
-                  console.error('Error:', error);
-              });
-        });
-    });
 </script>

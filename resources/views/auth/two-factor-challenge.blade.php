@@ -1,8 +1,7 @@
-@extends('layouts.auth')
+@pjax('layouts.auth')
 
 @section('title', 'Two-Factor Challenge')
 
-@section('content')
 <div class="card relative flex w-full max-w-md flex-col space-y-5 bg-white px-5 py-10 sm:mx-auto rounded-lg" style="filter: drop-shadow(14px 10px 10px #4a4a4a);">
     <div class="mx-auto mb-2 space-y-3">
         <h1 class="text-center text-2xl font-bold text-gray-800">Set Up Two-Factor Authentication</h1>
@@ -93,4 +92,3 @@
     </div>
 </div>
 </div>
-@endsection

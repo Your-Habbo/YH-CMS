@@ -24,4 +24,9 @@ class TrustedDevice extends Model
             'device_agent' => $agent->browser() . ' on ' . $agent->platform(),
         ]);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

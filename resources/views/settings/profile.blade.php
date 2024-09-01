@@ -1,3 +1,5 @@
+@pjax('layouts.app')
+
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center text-sm">
     <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
         <aside class="lg:col-span-3">
@@ -13,7 +15,7 @@
                     <!-- Moments of Triumph (MOT) -->
                     <section>
                         <h2 class="text-lg font-semibold text-gray-700 mb-2">Moment of Triumph (MOT)</h2>
-                        <form method="POST" action="{{ route('settings.updateMot') }}">
+                        <form method="POST" action="{{ route('settings.updateMot') }}" >
                             @csrf
                             <div class="space-y-3">
                                 <textarea name="mot" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" rows="3" placeholder="Describe your proudest achievement...">{{ old('mot', $user->mot) }}</textarea>

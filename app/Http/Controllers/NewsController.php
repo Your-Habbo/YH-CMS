@@ -18,7 +18,10 @@ class NewsController extends Controller
      */
     public function index()
     {
+        // Fetch the latest news with their authors, paginated
         $news = News::with('author')->orderBy('published_at', 'desc')->paginate(10);
+    
+        // Render the view, automatically handling PJAX requests
         return $this->view('news.index', compact('news'));
     }
 

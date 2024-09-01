@@ -1,4 +1,4 @@
-<header class="bg-white shadow-sm flex items-center justify-between p-4">
+<div class="bg-white shadow-sm flex items-center justify-between p-4">
                 <!-- Search Bar -->
                 <div class="flex-1 max-w-xl">
                     <div class="relative">
@@ -48,4 +48,5 @@
                         </div>
                     </div>
                 </div>
-            </header>
+</div>
+            

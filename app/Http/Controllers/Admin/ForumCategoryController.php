@@ -7,21 +7,23 @@ use App\Models\Forum\ForumCategory;
 use App\Models\Admin\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
+use App\Http\Traits\PjaxTrait;
 
 class ForumCategoryController extends Controller
 {
+    use PjaxTrait;
+
     public function index()
     {   
         
         $categories = ForumCategory::all();
-        return view('admin.forum.categories.index', compact('categories'));
+        return $this->view('admin.forum.categories.index', compact('categories'));
     }
 
     public function create()
     {   
         $images = Image::all();
-        return view('admin.forum.categories.create', compact('images'));
+        return $this->view('admin.forum.categories.create', compact('images'));
     }
 
     public function store(Request $request)
@@ -45,7 +47,7 @@ class ForumCategoryController extends Controller
     public function edit(ForumCategory $forumCategory)
     {
         $images = Image::all(); // Fetch all images
-        return view('admin.forum.categories.edit', compact('forumCategory', 'images'));
+        return $this->view('admin.forum.categories.edit', compact('forumCategory', 'images'));
     }
 
     public function update(Request $request, ThreadTag $forumTag)

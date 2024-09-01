@@ -10,9 +10,12 @@ use App\Models\Forum\ThreadLike;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Http\Traits\PjaxTrait;
 
 class ForumDashboardController extends Controller
 {
+    use PjaxTrait;
+
     public function index()
     {
         // Top Widgets Data
@@ -80,7 +83,7 @@ class ForumDashboardController extends Controller
                 ];
             });
 
-        return view('admin.forum.index', compact(
+        return $this->view('admin.forum.index', compact(
             'postsToday',
             'postsThisWeek',
             'postsThisMonth',

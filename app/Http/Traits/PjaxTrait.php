@@ -3,38 +3,54 @@
 namespace App\Http\Traits;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\View;
 
 trait PjaxTrait
 {
-    protected function view($view, $data = [], $status = 200)
+    protected function view($view, $data = [], $status = 200, $layout = null)
     {
+        // Ensure the layout is passed to the view data
+        $data = array_merge($data, ['layout' => $layout]);
+
+        $content = view($view, $data)->render();
+        $definedLayout = $GLOBALS['__pjaxLayout'] ?? $layout ?? 'layouts.auth';
+
+        // Render the layout view with the content passed as a variable
+        $layoutView = view($definedLayout, array_merge($data, ['content' => $content]));
+
         if (request()->ajax() || request()->header('X-PJAX')) {
-            $html = view($view, $data)->render();
+            $layoutContent = $layoutView->render();
+            $title = $this->extractTitle($layoutContent);
+
             return new JsonResponse([
-                'html' => $html,
-                'url' => request()->url(),
-                'title' => $data['title'] ?? config('app.name')
+                'html' => $content,
+                'title' => $title,
+                'layout' => $definedLayout,
+                'metaDescription' => $this->extractMetaDescription($layoutContent),
+                'canonicalUrl' => $this->extractCanonicalUrl($layoutContent)
             ], $status);
         }
-    
-        return view('layouts.app')->with('content', view($view, $data));
+
+        return response($layoutView, $status);
     }
 
-    protected function notFound($data = [])
+    private function extractTitle($content)
     {
-        $data['title'] = '404 - Page Not Found';
-        return $this->view('errors.404', $data, 404);
+        preg_match('/<title>(.*?)<\/title>/i', $content, $matches);
+        return $matches[1] ?? config('app.name');
     }
 
-    protected function notAuthorized($data = [])
+    private function extractMetaDescription($content)
     {
-        $data['title'] = '403 - Not Authorized';
-        return $this->view('errors.403', $data, 403);
+        preg_match('/<meta name="description" content="(.*?)"/i', $content, $matches);
+        return $matches[1] ?? '';
     }
 
-    protected function serverError($data = [])
+    private function extractCanonicalUrl($content)
     {
-        $data['title'] = '500 - Server Error';
-        return $this->view('errors.500', $data, 500);
+        preg_match('/<link rel="canonical" href="(.*?)"/i', $content, $matches);
+        return $matches[1] ?? request()->url();
     }
 }
+
+

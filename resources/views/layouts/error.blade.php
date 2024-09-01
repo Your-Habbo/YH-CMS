@@ -19,10 +19,10 @@
 <body>
 
 
-
-    <main id="content" class="flex justify-center mt-10 px-4 sm:px-6 lg:px-8">
-        @yield('content')
-    </main>
+    <div class="flex h-screen  items-center overflow-hidden" id="main-content" >
+        {{-- This will load the content when the page is not using PJAX --}}
+        {!! $content ?? '' !!}
+    </div>
 
     @include('layouts.partials.footer')
     

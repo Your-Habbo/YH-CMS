@@ -1,6 +1,5 @@
-@extends('admin.layouts.app')
+@pjax('layouts.admin')
 
-@section('content')
 <main class="flex-1 overflow-y-auto bg-gray-100">
     <!-- Breadcrumbs -->
     @component('components.admin-breadcrumbs', ['breadcrumbs' => $breadcrumbs])
@@ -197,4 +196,4 @@
     }
 </script>
 
-@endsection
+

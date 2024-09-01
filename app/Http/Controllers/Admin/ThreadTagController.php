@@ -7,18 +7,21 @@ use App\Models\Forum\ThreadTag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Http\Traits\PjaxTrait;
 
 class ThreadTagController extends Controller
 {
+    use PjaxTrait;
+    
     public function index()
     {
         $tags = ThreadTag::all();
-        return view('admin.forum.tags.index', compact('tags'));
+        return $this->view('admin.forum.tags.index', compact('tags'));
     }
 
     public function create()
     {
-        return view('admin.forum.tags.create');
+        return $this->view('admin.forum.tags.create');
     }
 
     public function store(Request $request)
@@ -67,7 +70,7 @@ class ThreadTagController extends Controller
     {
         $forumTag = ThreadTag::findOrFail($id); // Fetch the tag by ID
 
-        return view('admin.forum.tags.edit', compact('forumTag')); // Pass the tag to the view
+        return $this->view('admin.forum.tags.edit', compact('forumTag')); // Pass the tag to the view
     }
 
     public function destroy(ThreadTag $forumTag) // Use consistent variable name

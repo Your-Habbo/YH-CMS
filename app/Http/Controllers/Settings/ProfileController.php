@@ -13,6 +13,8 @@ use App\Models\Admin\Image;
 use App\Models\UserHabboLink;
 use Carbon\Carbon;
 use App\Jobs\CheckHabboMOT;
+use Purifier;
+
 
 class ProfileController extends Controller
 {   
@@ -169,7 +171,8 @@ class ProfileController extends Controller
         ]);
     
         $user = Auth::user();
-        $user->mot = $request->input('mot');
+        // Remove all HTML tags from the input
+        $user->mot = strip_tags($request->input('mot'));
         $user->save();
     
         return redirect()->route('settings.profile')->with('success', 'MOT updated successfully!');
@@ -182,14 +185,13 @@ class ProfileController extends Controller
         ]);
     
         $user = Auth::user();
-        $user->forum_signature = $request->input('forum_signature');
+        // Sanitize the forum signature input
+        $user->forum_signature = Purifier::clean($request->input('forum_signature'), 'default');
         $user->save();
     
         return redirect()->route('settings.profile')->with('success', 'Forum Signature updated successfully!');
     }
-
-
-
+    
 
     public function updateProfileBanner(Request $request)
     {

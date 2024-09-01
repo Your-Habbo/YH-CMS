@@ -1,16 +1,19 @@
+@pjax('layouts.app')
 @section('title', 'YourHabbo Homepage')
 
 
 @php
-function getAvatarUrl($avatarConfig) {
-    $baseUrl = url('/habbo-imaging/avatarimage');
-    $params = [
-        'figure' => $avatarConfig,
-        'size' => 'm',
-        'head_direction' => 2,
-        'headonly' => 1,
-    ];
-    return $baseUrl . '?' . http_build_query($params);
+if (!function_exists('getAvatarUrl')) {
+    function getAvatarUrl($avatarConfig) {
+        $baseUrl = url('/habbo-imaging/avatarimage');
+        $params = [
+            'figure' => $avatarConfig,
+            'size' => 'm',
+            'head_direction' => 2,
+            'headonly' => 1,
+        ];
+        return $baseUrl . '?' . http_build_query($params);
+    }
 }
 @endphp
 
@@ -23,7 +26,7 @@ function getAvatarUrl($avatarConfig) {
         <div class="w-full">
             <section class="card threads">
                 <div class="card-header blue">
-                    <h3 class="text-base sm:text-lg">
+                    <h3 class="text-base sm:text-m">
                         <i class="fas fa-comments mr-2"></i>Forum Thread
                     </h3>
                 </div>
@@ -70,7 +73,7 @@ function getAvatarUrl($avatarConfig) {
                             <div class="flex-grow flex flex-col">
                                 <div class="flex-grow">
                                     <h2 class="text-xl font-bold text-gray-800 mb-2">{{ $thread->title }}</h2>
-                                    <p class="text-sm text-gray-600 mb-4">{{ $thread->content }}</p>
+                                    <p class="text-sm text-gray-600 mb-4">{!! $thread->content !!}</p>
                                 </div>
 
                                 <!-- Right Column for Metadata and Actions -->
@@ -105,7 +108,7 @@ function getAvatarUrl($avatarConfig) {
                                     <div class="thread-actions flex flex-wrap items-center gap-2">
                                         <!-- Thread Like Button -->
                                         <button class="like-thread-btn flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs hover:bg-blue-200 transition-colors"
-                                                data-thread-id="{{ $thread->id }}" data-liked="{{ $userHasLikedThread }}">
+                                            data-thread-id="{{ $thread->id }}" data-liked="{{ $userHasLikedThread ? 'true' : 'false' }}">
                                             <i class="fas fa-heart mr-1"></i>
                                             <span class="likes-count">{{ $thread->likes_count }}</span>
                                         </button>
@@ -114,112 +117,237 @@ function getAvatarUrl($avatarConfig) {
                                             <i class="fas fa-share mr-1"></i> Share
                                         </button>
                                         @if(auth()->id() === $thread->user_id)
-                                        <button class="edit-thread-btn flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs hover:bg-yellow-200 transition-colors" data-thread-id="{{ $thread->id }}">
+                                        <a href="{{ route('forum.threads.edit', $thread->id) }}" class="edit-thread-btn flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs hover:bg-yellow-200 transition-colors">
                                             <i class="fas fa-edit mr-1"></i> Edit
+                                        </a>
+                                        @endif
+                                        @if($thread->is_edited)
+                                        <button class="view-history-btn flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
+                                        data-toggle="collapse" data-target="#history-thread">
+                                        <i class="fas fa-history mr-1"></i> History
                                         </button>
                                         @endif
-                                        <button class="view-thread-history-btn flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs hover:bg-gray-200 transition-colors" data-thread-id="{{ $thread->id }}">
-                                            <i class="fas fa-history mr-1"></i> History
-                                        </button>
+                                        @if(Auth::user() && Auth::user()->can('manage forum'))
+                                            <button id="toggleStickyBtn" class="sticky-thread-btn px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors text-xs" data-thread-id="{{ $thread->id }}">
+                                                <i class="fas fa-thumbtack mr-1"></i> 
+                                                <span id="stickyBtnText">{{ $thread->is_sticky ? 'Unsticky' : 'Sticky' }}</span>
+                                            </button>
+                                        @endif
+                                        @auth
+                                            @if(Auth::id() === $thread->user_id || Auth::user()->can('delete forum threads'))
+                                                <button class="delete-thread-btn px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-xs" data-thread-id="{{ $thread->id }}">
+                                                    <i class="fas fa-trash mr-1"></i> Delete Thread
+                                                </button>
+                                            @endif
+                                        @endauth
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <hr class="mb-3 sm:mb-5 border-t border-gray-300">
+                    @if($thread->is_edited)
+                        <!-- Collapsible History Section -->
+                        <div id="history-thread" class="collapse mt-3 bg-gray-100 p-3 rounded hidden">
+                            @foreach($thread->editHistory as $history)
+                            <div class="mb-2">
+                                <strong>Edited by:</strong> {{ $history->user->name }} <br>
+                                <strong>Old Title:</strong> {{ $history->old_title ?? 'N/A' }} <br>
+                                <strong>New Title:</strong> {{ $history->new_title ?? 'N/A' }} <br>
+                                <strong>Old Content:</strong> {!! nl2br(e($history->old_content)) !!} <br>
+                                <strong>New Content:</strong> {!! nl2br(e($history->new_content)) !!} <br>
+                                <strong>Edited at:</strong> {{ $history->created_at->format('Y-m-d H:i:s') }}
+                            </div>
+                            <hr class="border-gray-300 my-2">
+                        @endforeach
+                        </div>
 
-                    <h4 class="text-sm sm:text-base font-bold mb-2 sm:mb-3">Replies ({{ $thread->posts->count() }})</h4>
 
-                    @foreach($thread->posts as $index => $post)
-                    <div class="post-item p-2 sm:p-3 border-b border-gray-200 mb-2 sm:mb-3 rounded-lg shadow-sm 
-                        {{ $index % 2 == 0 ? 'bg-gradient-to-r from-gray-100 to-gray-50' : 'bg-gradient-to-r from-gray-50 to-gray-100' }}">
-                        <div class="flex flex-col sm:flex-row items-start">
-                            <!-- User Card (for replies) -->
-                            <div class="w-full sm:w-1/5 mb-3 sm:mb-0 sm:mr-4">
-                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                                    <!-- User Banner -->
-                                    <div class="h-24 bg-cover bg-center" style="background-image: url('{{ asset('storage/' . $post->user->profile_banner ?? 'default_banner_url') }}');"></div>
-                                    <!-- User Info -->
-                                    <div class="p-2">
-                                        <div class="flex items-center mb-2">
-                                            <img src="{{ getAvatarUrl($post->user->avatar_config ?? 'default_avatar_config') }}" alt="{{ $post->user->name ?? 'Default Avatar' }}'s Avatar" class="w-10 h-10 rounded-full mr-2">
-                                            <div>
-                                                <h5 class="text-xs font-bold truncate">{{ $post->user->name }}</h5>
-                                                <p class="text-xxs text-gray-600 truncate">{{ $post->user->roles->pluck('name')->implode(', ') ?? 'Member' }}</p>
+                    @endif
+
+                    <div class="space-y-6">
+                        @foreach($paginatedPosts as $index => $post)
+                        
+                        <div class="post-item mb-6 rounded-lg shadow-sm overflow-hidden
+                            {{ $index % 2 == 0 ? 'bg-gradient-to-r from-gray-100 to-gray-50' : 'bg-gradient-to-r from-gray-50 to-gray-100' }}">
+                            <div class="flex flex-col sm:flex-row">
+                                <!-- User Card - Keep as is -->
+                                <div class="w-full sm:w-48 bg-white flex flex-col overflow-hidden">
+                                    <div class="h-24 bg-cover bg-center relative" 
+                                         style="background-image: url('{{ asset('storage/' . $post->user->profile_banner ?? 'default_banner_url') }}');">
+                                        <div class="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black to-transparent">
+                                            <div class="flex items-end">
+                                                <img src="{{ getAvatarUrl($post->user->avatar_config ?? 'default_avatar_config') }}" 
+                                                     alt="{{ $post->user->name }}'s Avatar" 
+                                                     class="w-10 h-10 rounded-full border-2 border-white mr-2" loading="lazy">
+                                                <div class="text-white">
+                                                    <h4 class="text-xs font-bold truncate">{{ $post->user->name }}</h4>
+                                                    <p class="text-xxs truncate">{{ $post->user->roles->pluck('name')->implode(', ') ?? 'Member' }}</p>
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="p-2">
                                         <div class="text-xxs text-gray-600">
-                                            <p class="mb-1"><span class="font-semibold">MOT:</span> {{ $post->user->mot ?? 'No MOTD set.' }}</p>
+                                            <p class="mb-1"><span class="font-semibold">MOT:</span> <span class="truncate block">{{ $post->user->mot ?? 'No MOTD set.' }}</span></p>
                                             <p class="mb-1"><span class="font-semibold">Posts:</span> {{ $post->user->forumPosts_count ?? 0 }}</p>
                                             <p class="mb-1"><span class="font-semibold">Points:</span> {{ $post->user->contribution_points ?? 0 }}</p>
                                         </div>
+                                        <div class="mt-2 text-xxs">
+                                            <p class="{{ $post->user->is_online ? 'text-green-500' : 'text-red-500' }}">
+                                                {{ $post->user->is_online ? 'Online' : 'Offline' }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Post Content -->
-                            <div class="post-content flex-grow flex flex-col justify-between">
-                                <p class="mb-4 text-xs sm:text-sm text-gray-800">{{ $post->content }}</p>
-                                
-                                <!-- User Signature -->
-                                <p class="mt-4 text-xs text-gray-600 border-t pt-2">{{ $post->user->forum_signature ?? 'No signature.' }}</p>
-
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xxs sm:text-xs text-gray-600">
-                                    <!-- Left Side: Posted Info -->
-                                    <div class="mb-2 sm:mb-0">
-                                        Posted {{ $post->created_at->diffForHumans() }}
-                                        @if($post->is_edited)
-                                        <span class="ml-1 sm:ml-2 text-xxs text-gray-500">(Edited)</span>
-                                        @endif
-                                    </div>
-
-                                    <!-- Right Side: Actions -->
-                                    <div class="flex flex-wrap gap-2">
-                                        <!-- Post Like Button (within the loop that renders posts) -->
-                                        <button class="like-post-btn flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
-                                                data-post-id="{{ $post->id }}" data-liked="{{ $post->userHasLiked }}">
-                                            <i class="fas fa-thumbs-up mr-1"></i>
-                                            <span class="likes-count">{{ $post->likes_count }}</span>
-                                        </button>
+                        
+                                <!-- Post Content - With max-width -->
+                                <div class="flex-grow p-4 sm:p-6 flex flex-col justify-between">
+                                    <div class="max-w-[800px]"> <!-- Added max-width here -->
+                                        <div class="prose prose-sm max-w-none mb-4">
+                                            {!! clean($post->content) !!}
+                                        </div>
                                         
-                                        @if($post->user_id === auth()->id())
-                                        <button class="edit-post-btn flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full hover:bg-yellow-200 transition-colors" data-post-id="{{ $post->id }}">
-                                            <i class="fas fa-edit mr-1"></i> Edit
-                                        </button>
+                                        @if($post->user->forum_signature)
+                                        <div class="prose">
+                                            <div class="mt-4 text-xs text-gray-600 border-t pt-2">
+                                                {!! clean($post->user->forum_signature) !!}
+                                            </div>
+                                        </div>
                                         @endif
-                                        @if($post->is_edited)
-                                        <button class="view-history-btn flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors" data-post-id="{{ $post->id }}">
-                                            <i class="fas fa-history mr-1"></i> History
-                                        </button>
-                                        @endif
+                                    </div>
+                        
+                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs text-gray-600 mt-4">
+                                        <div>
+                                            Posted {{ $post->created_at->diffForHumans() }}
+                                            @if($post->is_edited)
+                                                <span class="ml-2 text-xs text-gray-500">(Edited)</span>
+                                            @endif
+                                        </div>
+                        
+                                        <div class="flex flex-wrap gap-2 mt-2 sm:mt-0">
+                                            <button class="like-post-btn flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
+                                                    data-post-id="{{ $post->id }}" data-liked="{{ $post->userHasLiked ? 'true' : 'false' }}">
+                                                <i class="fas fa-thumbs-up mr-1"></i>
+                                                <span class="likes-count">{{ $post->likes_count }}</span>
+                                            </button>
+                                            
+                                            @if($post->user_id === auth()->id())
+                                            <button class="edit-post-btn flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full hover:bg-yellow-200 transition-colors"
+                                                    data-post-id="{{ $post->id }}"
+                                                    data-post-content="{{ $post->content }}">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </button>
+                                            @endif
+                                            @if(auth()->id() === $thread->user_id && !$thread->is_resolved)
+                                            <form action="{{ route('forum.posts.markSolution', [$thread->id, $post->id]) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success">Mark as Solution</button>
+                                            </form>
+                                            @endif
+                                            @if($post->is_edited)
+                                            <button class="view-history-btn flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
+                                                    data-toggle="collapse" data-target="#history-{{ $post->id }}">
+                                                <i class="fas fa-history mr-1"></i> History
+                                            </button>
+                                            @endif
+
+                                            @auth
+                                            
+                                            @if(Auth::id() === $post->user_id || Auth::user()->can('delete forum posts'))
+                                                @if(!$post->deleted_at)
+                                                    <button class="delete-post-btn px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-xs" data-post-id="{{ $post->id }}">
+                                                        <i class="fas fa-trash mr-1"></i> Delete Post
+                                                    </button>
+                                                @else
+                                                    <span class="text-gray-500 text-xs italic">Post deleted</span>
+                                                @endif
+                                            @endif
+                                        @endauth
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Post History Section -->
+                        @if($post->is_edited)
+                        <!-- Collapsible History Section -->
+                        <div id="history-{{ $post->id }}" class="collapse mt-3 bg-gray-100 p-3 rounded hidden">
+                            @foreach($post->editHistory as $history)
+                                <div class="mb-2">
+                                    <strong>Edited by:</strong> {{ $history->user->name }} <br>
+                                    <strong>Old Content:</strong> {!! nl2br(e($history->old_content)) !!} <br>
+                                    <strong>New Content:</strong> {!! nl2br(e($history->new_content)) !!} <br>
+                                    <strong>Edited at:</strong> {{ $history->created_at->format('Y-m-d H:i:s') }}
+                                </div>
+                                <hr class="border-gray-300 my-2">
+                            @endforeach
+                        </div>
+                        @endif
+                        @endforeach
                     </div>
-                    @endforeach
-                </div>
+                    <div class="pt-5">
+                        {{ $paginatedPosts->links() }} <!-- Pagination -->
+                    </div>
+                    @auth
+                    <!-- Reply Form -->
+                    <div class="bg-gray-100 rounded-lg p-4 mt-2">
+                        <h3 class="text-lg font-bold mb-3">Leave a Reply</h3>
+                        <form action="{{ route('forum.posts.store', $thread->id) }}" method="POST" id="reply-form">
+                            @csrf
+                            <div class="mb-3">
+                                <textarea name="content" id="content" required rows="4" 
+                                          class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                          placeholder="Type your reply here..."></textarea>
+                            </div>
 
-                <div class="card-content p-3 sm:p-5 bg-gray-100 rounded-b-lg">
-                    <h4 class="text-sm sm:text-base font-bold mb-2 sm:mb-3">Leave a Reply</h4>
-                    <form action="{{ route('forum.posts.store', $thread->id) }}" method="POST">
-                        @csrf
-                        <div class="mb-2 sm:mb-3">
-                            <textarea name="content" id="content" required rows="4" class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 text-xs" placeholder="Type your reply here..."></textarea>
-                        </div>
-
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm">Post Reply</button>
-                        </div>
-                    </form>
+                            <div class="flex justify-end">
+                                <button type="submit" id="submit-button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm">
+                                    Post Reply
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    @else
+                        
+                    @endauth
                 </div>
             </section>
         </div>
     </div>
 </div>
 
+<!-- Add necessary JavaScript for collapsible sections -->
 
 
+<!-- Edit Post Modal -->
+<div id="editPostModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      
+      <!-- Modal Content -->
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit Post</h3>
+          <div class="mt-2">
+            <textarea id="editPostContent" rows="6" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button id="confirmEditPostButton" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">Save</button>
+          <button type="button" id="cancelEditPostButton" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  @include('forum.components.confirmation')
+  
 
+  @section('scripts')
 
+@endsection

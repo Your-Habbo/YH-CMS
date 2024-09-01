@@ -1,4 +1,4 @@
-
+@pjax('layouts.app')
 
 @section('title', 'YourHabbo Homepage')
 

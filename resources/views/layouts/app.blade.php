@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
+ 
 </head>
 <body>
     @include('layouts.partials.header')
@@ -31,11 +31,13 @@
         }
     </style>
 
-    <main id="content" class="flex justify-center mt-10 px-4 sm:px-6 lg:px-8">
+    <main id="main-content" class="flex justify-center mt-10 px-4 sm:px-6 lg:px-8" >
         {{-- This will load the content when the page is not using PJAX --}}
         {!! $content !!}
+        
     </main>
 
     @include('layouts.partials.footer')
+    @yield('scripts')
 </body>
 </html>

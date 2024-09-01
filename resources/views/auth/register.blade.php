@@ -1,9 +1,5 @@
-@extends('layouts.auth')
-
+@pjax('layouts.auth')
 @section('title', 'Sign In')
-
-@section('content')
-
 
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md ">
@@ -34,22 +30,6 @@
                         @error('username')
                             <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                    <div class="relative w-full">
-                        <input type="text" id="name" name="name" placeholder="John Doe"
-                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0" />
-                        <label for="name" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
-                            Display Name (Optional)
-                        </label>
-                    </div>
-
-                    <div class="relative w-full">
-                        <input type="date" id="dob" name="dob"
-                               class="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-xs text-gray-900 focus:border-gray-600 focus:outline-none focus:ring-0" />
-                        <label for="dob" class="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-gray-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-xs text-gray-500 duration-300">
-                            Date of Birth (Optional)
-                        </label>
                     </div>
 
                     <div class="relative w-full">
@@ -122,6 +102,3 @@
         </div>
     </div>
 
-
-
-@endsection

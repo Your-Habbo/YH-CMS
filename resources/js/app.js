@@ -13,10 +13,9 @@ Alpine.start();
 window.Alpine = Alpine;
 
 // Import the PJAX script
-import './pjax-script';
+import './main';
 
 // Test NProgress
 NProgress.start();
 setTimeout(() => NProgress.done(), 1000);
 
-import './echo';
